@@ -4,9 +4,6 @@ import java.util.Date
 // https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_packaging
 plugins {
     id 'java'
-	// Apply the application plugin to add support for building a CLI application in Java.
-	// This produces the distributions and scripts for any OS
-	id "application"
     // For source code formatting
     id "com.diffplug.spotless" version "6.25.0"
 	// https://github.com/harbby/gradle-serviceloader
@@ -46,28 +43,13 @@ dependencies {
 	testImplementation "com.google.truth:truth:1.+"
 }
 
-/**
- * Application Build
- * https://docs.gradle.org/current/userguide/application_plugin.html
- */
-application {
-    applicationName = "boxlang-servlet"
-    mainClass = "ortus.boxlang.web.Server"
-}
-
 java {
-	// See: https://docs.gradle.org/current/userguide/toolchains.html#toolchains
-    // This is to provide build consistency across developers and CI/CD
-    toolchain {
-        languageVersion = JavaLanguageVersion.of( project.properties[ "jdkVersion" ] )
-    }
 	withJavadocJar()
 }
 
 compileJava {
 	// Compiler Options
 	options.incremental = true
-	options.release = Integer.parseInt( project.properties[ "jdkVersion" ] )
 	options.encoding = 'UTF-8'
 	options.debug()
 }
@@ -75,8 +57,7 @@ compileJava {
 jar {
     archiveVersion =  "${version}"
  	manifest {
-		attributes 'Main-Class': 'ortus.boxlang.web.Server'
-	   	attributes 'Description': 'The BoxLang WebServer Runtime'
+	   	attributes 'Description': 'The BoxLang Servlet Runtime'
 		 if( branch == 'development' ){
 		   attributes 'Implementation-Version': "${version}-SNAPSHOT"
 	   } else {
@@ -86,6 +67,7 @@ jar {
 	   attributes 'Created-By': "Ortus Solutions, Corp"
     }
 }
+
 shadowJar {
     destinationDirectory = file( "build/distributions" )
 	//mergeServiceFiles()
@@ -94,21 +76,7 @@ shadowJar {
 	exclude "org/antlr/v4/gui/**"
 	exclude "com/ibm/icu/**"
 }
-
-/**
- * Cleanup final artifacts, we only want the shadow artifacts
- */
-tasks.distZip.setEnabled( false )
-tasks.distTar.setEnabled( false )
-tasks.shadowDistTar.setEnabled( false )
-// Create a task that renames a distribution file
-task renameDistributionFile( type: Task ) {
-	doLast {
-		file( "build/distributions/boxlang-servlet-shadow-${version}.zip" )
-			.renameTo( file( "build/distributions/boxlang-servlet-${version}.zip" ) )
-	}
-}
-build.finalizedBy( renameDistributionFile )
+build.dependsOn( shadowJar );
 
 /**
  * Docs are here:

@@ -1,6 +1,6 @@
 {
-    "name": "BoxLang Webserver Runtime",
-    "shortDescription": "The BoxLang Webserver Runtime",
+    "name": "BoxLang Servlet Runtime",
+    "shortDescription": "The BoxLang Servlet Runtime",
     "slug": "boxlang-servlet",
     "version": "@build.version@+@build.number@",
     "location": "https://downloads.ortussolutions.com/ortussolutions/boxlang-runtimes/boxlang-servlet/@build.version@/boxlang-servlet-@build.version@.zip",
