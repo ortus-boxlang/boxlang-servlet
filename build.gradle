@@ -33,9 +33,13 @@ dependencies {
 	// Until BoxLang is published to Maven Central
 	// Look for it in the local build directory
 	// You must run `./gradle build -x test` in the BoxLang project
-    implementation files( 'src/test/resources/libs/boxlang-1.0.0-all.jar' )
-	// https://mvnrepository.com/artifact/io.undertow/undertow-core/2.3.12.Final
-	implementation 'io.undertow:undertow-core:2.3.12.Final'
+    compileOnly files( 'src/test/resources/libs/boxlang-1.0.0-all.jar' )
+	
+	// https://mvnrepository.com/artifact/io.undertow/undertow-core/2.2.32.Final
+	compileOnly 'io.undertow:undertow-core:2.2.32.Final'
+
+	// I don't actually need these class files in the jar, they're here so I can compile against the servlet API and undertow so this will work in CommandBox.
+    compileOnly "io.undertow:undertow-servlet:2.2.32.Final"
 
     // Testing Dependencies
     testImplementation "org.junit.jupiter:junit-jupiter:5.+"
