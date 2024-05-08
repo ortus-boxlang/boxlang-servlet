@@ -22,6 +22,11 @@ This BoxLang Servlet Runtime is a Java Servlet implementation of the BoxLang lan
 
 ## Usage
 
+This runtime creates a CommandBox compatible engine that can be started using CommandBox. You can start the engine by running the following command:
+
+```bash
+box server start engine=boxlang
+```
 
 ## Ortus Sponsors
 

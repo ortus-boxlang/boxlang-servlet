@@ -1,7 +1,7 @@
 {
 	"name": "BoxLang CommandBox Engine",
 	"slug": "boxlang-prerelease",
-	"version": "1.0.0-snapshot",
+	"version": "@build.version@+@build.number@",
 	"type": "cf-engines",
 	"description": "The CommandBox Engine for BoxLang prerelease",
 	"createPackageDirectory": false

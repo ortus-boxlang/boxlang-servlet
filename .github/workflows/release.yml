@@ -58,7 +58,7 @@ jobs:
           # Read Version from gradle.properties
           echo "VERSION=`grep '^version=' gradle.properties | cut -d'=' -f2`" >> $GITHUB_ENV
 
-          # Branche
+          # Branch
           echo "Github Ref is $GITHUB_REF"
           echo "BRANCH=main" >> $GITHUB_ENV
 
@@ -75,12 +75,12 @@ jobs:
           changelogPath: ./changelog.md
           tag: v${{ env.VERSION }}
 
-      - name: Build it!
+      - name: Build v${{ env.VERSION }}
         run: |
           npm install -g markdownlint-cli
           markdownlint changelog.md --fix
           gradle downloadBoxLang
-          gradle build -x test --stacktrace --console=plain
+          gradle buildRuntime --stacktrace --console=plain
 
       - name: Commit Changelog [unreleased] with latest version
         uses: EndBug/add-and-commit@v9.1.4
@@ -99,14 +99,12 @@ jobs:
           force_push_tag: true
           message: "Latest Release v${{ env.VERSION }}"
 
-      - name: Upload Build Artifacts
+      - name: Upload Build Artifacts to Github
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: boxlang-build
           path: |
-            build/distributions/**
-            build/libs/**
             build/reports/tests/**
             changelog.md
 
@@ -119,7 +117,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_SECRET }}
           SOURCE_DIR: "build/distributions"
-          DEST_DIR: "boxlang-runtimes/${{ env.MODULE_ID }}/${{ env.VERSION }}"
+          DEST_DIR: "boxlang-runtimes/${{ env.MODULE_ID }}/${{ env.VERSION }}/"
 
       # - name: Upload API Docs to S3
       #   uses: jakejarvis/s3-sync-action@master
@@ -134,6 +132,11 @@ jobs:
 
       # - name: Publish to Maven Central
       #   run: |
+
+      - name: Publish to ForgeBox
+        run: |
+          cd build/forgebox
+          box forgebox publish --force
 
       - name: Create Github Release
         uses: taiki-e/create-gh-release-action@v1.8.0

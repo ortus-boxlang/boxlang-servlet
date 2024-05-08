@@ -12,6 +12,8 @@ plugins {
 	id 'com.github.johnrengelman.shadow' version '8.1.1'
     // Download task
     id "de.undercouch.download" version "5.6.0"
+	// Task visualizer
+	id "com.dorongold.task-tree" version "3.0.0"
 }
 
 /**
@@ -33,8 +35,8 @@ dependencies {
 	// Until BoxLang is published to Maven Central
 	// Look for it in the local build directory
 	// You must run `./gradle build -x test` in the BoxLang project
-    compileOnly files( 'src/test/resources/libs/boxlang-1.0.0-all.jar' )
-	
+    implementation files( 'src/test/resources/libs/boxlang-1.0.0-all.jar' )
+
 	// https://mvnrepository.com/artifact/io.undertow/undertow-core/2.2.32.Final
 	compileOnly 'io.undertow:undertow-core:2.2.32.Final'
 
@@ -119,6 +121,7 @@ javadoc {
 	options.addBooleanOption( 'html5', true )
 }
 task zipJavadocs( type: Zip ) {
+	dependsOn javadoc
 	group "documentation"
 	from javadoc.destinationDir
 	archiveFileName = "${project.name}-javadocs-${version}.zip"
@@ -148,6 +151,59 @@ test {
     useJUnitPlatform()
     testLogging {
 		showStandardStreams = true
+	}
+}
+
+/**
+ * Create the engine distribution
+ */
+task createWar( type: Copy ){
+	dependsOn( shadowJar )
+	// Prep the war file
+	from( "build/distributions" ) {
+		include "${project.name}-${version}-all.jar"
+        into "engine/WEB-INF/lib"
+    }
+	from( "src/main/resources" ) {
+		include "web.xml"
+		include "LICENSE"
+		include "box.json"
+		// Token Replacements Go Here
+		filter{ line -> line.replaceAll( '@build.version@', project.version ) }
+		if( project.branch == "development" ){
+			filter{ line -> line.replaceAll( '\\+@build.number@', '-SNAPSHOT' ) }
+		} else {
+			filter{ line -> line.replaceAll( '@build.number@', project.buildID ) }
+		}
+		into "engine/WEB-INF"
+	}
+	from( "build/engine/WEB-INF" ){
+		include "box.json"
+		into "distributions"
+	}
+	destinationDir = file( "build" )
+	doLast {
+		println "+ Engine has been created in the build/engine folder"
+	}
+}
+task packageWar( type: War ){
+	dependsOn( createWar )
+	archiveFileName = "${project.name}-${version}.war"
+	destinationDirectory = file( 'build/distributions' )
+	from( 'build/engine' )
+	doLast {
+		println "+ War created in the distributions folder"
+	}
+}
+task buildRuntime( type: Copy ){
+	dependsOn( packageWar )
+	from( 'build/distributions' ) {
+		include "${project.name}-${version}.war"
+		include "box.json"
+	}
+	destinationDir = file( 'build/forgebox' )
+	doLast {
+		println "+ CommandBox Engine created in the build/forgebox folder, ready for publishing"
 	}
 }
 
