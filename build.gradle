@@ -165,14 +165,18 @@ test {
  */
 task createWar( type: Copy ){
 	dependsOn( shadowJar )
-	// Prep the war file
+	// Move the runtime
 	from( "build/distributions" ) {
 		include "${project.name}-${version}-all.jar"
         into "engine/WEB-INF/lib"
     }
-	from( "src/main/resources" ) {
+	// License it up
+	from( "src/main/resources/META-INF/boxlang-servelet/license.txt" ) {
+		include "license.txt"
+	}
+	// Resources
+	from( "src/main/resources/boxlang-servlet" ) {
 		include "web.xml"
-		include "LICENSE"
 		include "box.json"
 		// Token Replacements Go Here
 		filter{ line -> line.replaceAll( '@build.version@', project.version ) }
@@ -183,6 +187,7 @@ task createWar( type: Copy ){
 		}
 		into "engine/WEB-INF"
 	}
+	// Move to distro for packaging
 	from( "build/engine/WEB-INF" ){
 		include "box.json"
 		into "distributions"
