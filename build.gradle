@@ -35,7 +35,7 @@ dependencies {
 	// Until BoxLang is published to Maven Central
 	// Look for it in the local build directory
 	// You must run `./gradle build -x test` in the BoxLang project
-    implementation files( 'src/test/resources/libs/boxlang-websupport-1.0.0.jar' )
+    implementation files( 'src/test/resources/libs/boxlang-web-support-1.0.0.jar' )
 	implementation files( 'src/test/resources/libs/boxlang-1.0.0-all.jar' )
 
 	// https://mvnrepository.com/artifact/io.undertow/undertow-core/2.2.32.Final
