@@ -5,5 +5,5 @@
 	"type": "cf-engines",
 	"description": "The CommandBox Engine for BoxLang",
 	"createPackageDirectory": false,
-	"listed": false
+	"listed": true
 }
