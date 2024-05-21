@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -28,6 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import io.undertow.predicate.Predicate;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.servlet.handlers.ServletRequestContext;
@@ -103,6 +105,16 @@ public class BoxLangServlet implements Servlet {
 		if ( exchange == null ) {
 			throw new ServletException( "This servlet only works inside Undertow. Running on: " + req.getServletContext().getServerInfo() );
 		}
+
+		if ( req instanceof javax.servlet.http.HttpServletRequest hreq ) {
+			Map<String, Object> predicateContext = exchange.getAttachment( Predicate.PREDICATE_CONTEXT );
+			if ( hreq.getPathInfo() != null ) {
+				predicateContext.put( "pathInfo", hreq.getPathInfo().replace( hreq.getServletPath(), "" ) );
+			} else {
+				predicateContext.put( "pathInfo", "" );
+			}
+		}
+
 		// FusionReactor automatically tracks servlets
 		// Note: web root can be different every request if this is a multi-site server or using ModCFML
 		WebRequestExecutor.execute( exchange, config.getServletContext().getRealPath( "/" ), false );
