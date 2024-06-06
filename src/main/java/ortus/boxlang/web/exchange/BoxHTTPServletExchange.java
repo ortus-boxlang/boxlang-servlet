@@ -120,12 +120,11 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	@Override
 	public void addResponseCookie( BoxCookie cookie ) {
 		Cookie c = new Cookie( cookie.getName(), cookie.getValue() );
-		if ( cookie.getDomain() != null )
-			c.setDomain( cookie.getDomain() );
-		if ( cookie.getPath() != null )
-			c.setPath( cookie.getPath() );
-		if ( cookie.getMaxAge() != null )
-			c.setMaxAge( cookie.getMaxAge() );
+		if( cookie.getDomain() != null ) c.setDomain( cookie.getDomain() );
+		if( cookie.getPath() != null ) c.setPath( cookie.() );
+		c.setSecure( cookie.isSecure() );
+		c.setHttpOnly( cookie.isHttpOnly() );
+		if( cookie.getMaxAge() != null ) c.setMaxAge( cookie.getMaxAge() );
 		// TODO: Does servlet not support these?
 		// c.setSameSite(cookie.isSameSite());
 		// c.setExpires(cookie.getExpires());
@@ -203,6 +202,9 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				c.setDomain( cookie.getDomain() );
 			if ( cookie.getPath() != null )
 				c.setPath( cookie.getPath() );
+			c.setSecure( cookie.getSecure() );
+			c.setHttpOnly( cookie.isHttpOnly() );
+			c.setMaxAge( cookie.getMaxAge() );
 			// TODO: Not supportd in servlet?
 			// c.setSameSite( cookie.getSameSite() );
 			// c.setExpires( cookie.getExpires() );
