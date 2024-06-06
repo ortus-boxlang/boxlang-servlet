@@ -17,7 +17,6 @@
  */
 package ortus.boxlang.web.exchange;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,6 +47,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -341,19 +341,8 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 						}
 					}
 				}
-			} else if ( contentType.startsWith( "text/plain" ) ) {
-				BufferedReader	reader	= request.getReader();
-				String			line;
-				while ( ( line = reader.readLine() ) != null ) {
-					String[] parts = line.split( "=", 2 );
-					if ( parts.length >= 2 ) {
-						String	name	= parts[ 0 ];
-						String	value	= parts[ 1 ];
-						params.computeIfAbsent( name, k -> new LinkedList<>() ).add( value );
-					}
-				}
 			}
-		} catch ( Exception e ) {
+		} catch ( FileUploadException | IllegalStateException | IOException e ) {
 			throw new RuntimeException( "Could not parse form parameters", e );
 		}
 
