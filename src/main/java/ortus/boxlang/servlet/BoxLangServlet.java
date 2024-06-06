@@ -21,28 +21,25 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import io.undertow.predicate.Predicate;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.servlet.handlers.ServletRequestContext;
 import ortus.boxlang.runtime.BoxRuntime;
 import ortus.boxlang.runtime.scopes.Key;
 import ortus.boxlang.web.WebRequestExecutor;
+import ortus.boxlang.web.exchange.BoxHTTPServletExchange;
 
 /**
  * The BoxLangServlet is a servlet that can be used to run BoxLang code in a web application.
  */
 public class BoxLangServlet implements Servlet {
 
-	HttpHandler		undertowhandler;
 	ServletConfig	config;
 	BoxRuntime		runtime;
 
@@ -97,34 +94,26 @@ public class BoxLangServlet implements Servlet {
 	 * @throws IOException      If an I/O error occurs.
 	 */
 	public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException {
-		HttpServerExchange		exchange				= null;
-		ServletRequestContext	servletRequestContext	= ServletRequestContext.current();
-		if ( servletRequestContext != null ) {
-			exchange = servletRequestContext.getExchange();
-		}
-		if ( exchange == null ) {
-			throw new ServletException( "This servlet only works inside Undertow. Running on: " + req.getServletContext().getServerInfo() );
-		}
-
-		if ( req instanceof javax.servlet.http.HttpServletRequest hreq ) {
-			Map<String, Object> predicateContext = exchange.getAttachment( Predicate.PREDICATE_CONTEXT );
-			if ( hreq.getPathInfo() != null ) {
-				predicateContext.put( "pathInfo", hreq.getPathInfo().replace( hreq.getServletPath(), "" ) );
-			} else {
-				predicateContext.put( "pathInfo", "" );
-			}
-		}
-
 		// FusionReactor automatically tracks servlets
 		// Note: web root can be different every request if this is a multi-site server or using ModCFML
-		WebRequestExecutor.execute( exchange, config.getServletContext().getRealPath( "/" ), false );
+		var exchange = new BoxHTTPServletExchange( ( HttpServletRequest ) req, ( HttpServletResponse ) res );
+		try {
+			WebRequestExecutor.execute( exchange, config.getServletContext().getRealPath( "/" ), false );
+		} finally {
+			// Clean up file uploads
+			for ( var upload : exchange.getUploadData() ) {
+				try {
+					upload.tmpPath().toFile().delete();
+				} catch ( Exception e ) {
+				}
+			}
+		}
 	}
 
 	/**
 	 * Destroy the servlet.
 	 */
 	public void destroy() {
-		undertowhandler = null;
 		this.runtime.shutdown();
 		this.runtime = null;
 	}

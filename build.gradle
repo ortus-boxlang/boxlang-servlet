@@ -43,12 +43,11 @@ dependencies {
 	implementation files( 'src/test/resources/libs/boxlang-web-support-1.0.0.jar' )
 	implementation files( 'src/test/resources/libs/boxlang-1.0.0-all.jar' )
 
-	// https://mvnrepository.com/artifact/io.undertow/undertow-core/2.2.32.Final
-	compileOnly 'io.undertow:undertow-core:2.2.32.Final'
+	// Servlet API
+	implementation 'javax.servlet:javax.servlet-api:4.0.1'
 
-	// I don't actually need these class files in the jar, they're here so I can compile against the servlet API and undertow so this will work in CommandBox.
-    compileOnly "io.undertow:undertow-servlet:2.2.32.Final"
-
+ 	implementation 'commons-fileupload:commons-fileupload:1.4'
+	
     // Testing Dependencies
     testImplementation "org.junit.jupiter:junit-jupiter:5.+"
 	testImplementation "org.mockito:mockito-core:5.+"
