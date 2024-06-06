@@ -305,15 +305,14 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 		try {
 			if ( contentType.startsWith( "application/x-www-form-urlencoded" ) ) {
-				String queryString = request.getQueryString();
-				if ( queryString != null ) {
-					String[] pairs = queryString.split( "&" );
-					for ( String pair : pairs ) {
-						int		idx		= pair.indexOf( "=" );
-						String	key		= URLDecoder.decode( pair.substring( 0, idx ), request.getCharacterEncoding() );
-						String	value	= URLDecoder.decode( pair.substring( idx + 1 ), request.getCharacterEncoding() );
-						params.computeIfAbsent( key, k -> new LinkedList<>() ).add( value );
-					}
+				String requestBody = request.getReader().lines().collect( Collectors.joining( System.lineSeparator() ) );
+				System.out.println( "Request body: " + requestBody );
+				String[] pairs = requestBody.split( "&" );
+				for ( String pair : pairs ) {
+					int		idx		= pair.indexOf( "=" );
+					String	key		= URLDecoder.decode( pair.substring( 0, idx ), getCharacterEncodingOrDefault() );
+					String	value	= URLDecoder.decode( pair.substring( idx + 1 ), getCharacterEncodingOrDefault() );
+					params.computeIfAbsent( key, k -> new LinkedList<>() ).add( value );
 				}
 			} else if ( contentType.startsWith( "multipart/form-data" ) ) {
 
@@ -360,6 +359,11 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 		return params.entrySet().stream()
 		    .collect( Collectors.toMap( Map.Entry::getKey, e -> e.getValue().toArray( new String[ 0 ] ) ) );
+	}
+
+	public String getCharacterEncodingOrDefault() {
+		String encoding = request.getCharacterEncoding();
+		return encoding != null ? encoding : "UTF-8";
 	}
 
 	@Override
