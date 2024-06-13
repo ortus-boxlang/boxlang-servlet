@@ -342,7 +342,9 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 					}
 				}
 			}
-		} catch ( FileUploadException | IllegalStateException | IOException e ) {
+		} catch ( IllegalStateException e ) {
+			// if request is already read, we can't read it again
+		} catch ( FileUploadException | IOException e ) {
 			throw new RuntimeException( "Could not parse form parameters", e );
 		}
 
@@ -397,8 +399,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			} else {
 				return inputStream.readAllBytes();
 			}
-		} catch ( IOException e ) {
-			e.printStackTrace();
+		} catch ( IOException | IllegalStateException e ) {
 			return "";
 		}
 	}
