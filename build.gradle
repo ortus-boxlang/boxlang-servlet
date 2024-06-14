@@ -1,3 +1,5 @@
+import java.nio.file.StandardCopyOption
+import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -218,7 +220,16 @@ task buildRuntime( type: Copy ){
 		include "box.json"
 	}
 	destinationDir = file( 'build/forgebox' )
+
 	doLast {
+		file( "build/evergreen" ).mkdirs()
+		if( branch == 'development' ){
+			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.war" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( file( "build/distributions/boxlang-servlet-${version}-all.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot-all.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+		} else {
+			Files.copy( file( "build/distributions/boxlang-servlet-${version}.zip" ).toPath(), file( "build/evergreen/boxlang-servlet-latest.zip" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+		}
+
 		println "+ CommandBox Engine created in the build/forgebox folder, ready for publishing"
 	}
 }
