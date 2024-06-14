@@ -36,18 +36,18 @@ repositories {
 dependencies {
 	// LOCAL DEVELOPMENT ONLY
 	// CHOOSE THE RIGHT LOCATION FOR YOUR LOCAL DEPENDENCIES
-    implementation files( '../boxlang/build/distributions/boxlang-1.0.0-all.jar' )
-	implementation files( '../boxlang-web-support/build/distributions/boxlang-web-support-1.0.0.jar' )
+    implementation files( '../boxlang/build/distributions/boxlang-' + boxlangVersion + '-all.jar' )
+	implementation files( '../boxlang-web-support/build/distributions/boxlang-web-support-' + boxlangVersion + '.jar' )
 
 	// Downloaded Dependencies
-	implementation files( 'src/test/resources/libs/boxlang-web-support-1.0.0.jar' )
-	implementation files( 'src/test/resources/libs/boxlang-1.0.0-all.jar' )
+	implementation files( 'src/test/resources/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
+	implementation files( 'src/test/resources/libs/boxlang-' + boxlangVersion + '-all.jar' )
 
 	// Servlet API
 	implementation 'javax.servlet:javax.servlet-api:4.0.1'
 
  	implementation 'commons-fileupload:commons-fileupload:1.4'
-	
+
     // Testing Dependencies
     testImplementation "org.junit.jupiter:junit-jupiter:5.+"
 	testImplementation "org.mockito:mockito-core:5.+"
@@ -122,7 +122,7 @@ processResources {
 	if( branch == 'development' ){
 		filter( ReplaceTokens, tokens: [ 'build.number': "-SNAPSHOT" ] )
 	} else {
-		filter( ReplaceTokens, tokens: [ 'build.number': "+${buildID}" ] )
+		filter( ReplaceTokens, tokens: [ 'build.number': "+" + buildID ] )
 	}
 }
 
@@ -232,13 +232,13 @@ task downloadBoxLang( type: Download ) {
 	doFirst {
 		file( "src/test/resources/libs" ).mkdirs()
 	}
-    // Configure the URL of the file to download
-    src([
+	// Configure the URLs of the files to download
+	src([
 		"https://downloads.ortussolutions.com/ortussolutions/boxlang/${boxlangVersion}/boxlang-${boxlangVersion}-all.jar",
 		"https://downloads.ortussolutions.com/ortussolutions/boxlang-runtimes/boxlang-web-support/${boxlangVersion}/boxlang-web-support-${boxlangVersion}.jar"
 	])
-    // Specify the destination directories for the downloaded files
-    dest "src/test/resources/libs/"
+	// Specify the destination directories for the downloaded files
+	dest "src/test/resources/libs/"
     overwrite true
     onlyIfModified false
 }
@@ -247,17 +247,24 @@ task downloadBoxLang( type: Download ) {
  * Project Wide Helper function
  * This is not a task, but a reusable UDF
  */
-project.ext.bumpVersion = { boolean major = false, boolean minor = false, boolean patch = false ->
+project.ext.bumpVersion = {
+	boolean major = false,
+	boolean minor = false,
+	boolean patch = false,
+	boolean beta = false,
+	property = "version" ->
 
-	def propertiesFile = file( '../gradle.properties' );
+	def propertiesFile = file( './gradle.properties' );
 	def properties = new Properties();
 
 	properties.load( propertiesFile.newDataInputStream() )
 	def versionTarget = major ? 0 : minor ? 1 : 2
 
-	def currentVersion = properties.getProperty( 'version' )
+	def currentVersion = properties.getProperty( property )
 	def versionParts = currentVersion.split( '\\.' )
-	def newPathVersion = versionParts[ versionTarget ].toInteger() + 1
+	if( !beta ){
+		def newPathVersion = versionParts[ versionTarget ].toInteger() + 1
+	}
 	def newVersion = '';
 
 	if( patch ){
@@ -266,19 +273,27 @@ project.ext.bumpVersion = { boolean major = false, boolean minor = false, boolea
 		newVersion = "${versionParts[ 0 ]}.${newPathVersion}.${versionParts[ 2 ]}"
 	} else if( major ){
 		newVersion = "${newPathVersion}.${versionParts[ 1 ]}.${versionParts[ 2 ]}"
+	} else if( beta ){
+		// Get's the -betaX version.
+		def betaString = currentVersion.split( '-' )[ 1 ]
+		// Now we get the beta number
+		def betaNumber = betaString.split( 'beta' )[ 1 ].toInteger() + 1
+		newVersion = currentVersion.split( '-' )[ 0 ] + "-beta${betaNumber}"
 	}
 
-	properties.setProperty( 'version', newVersion )
+	properties.setProperty( property, newVersion )
 	properties.store( propertiesFile.newWriter(), null )
 
 	println "Bumped version from ${currentVersion} to ${newVersion}"
 }
+
 /**
  * Bump the major version number
  */
 task bumpMajorVersion {
 	doLast{
-		bumpVersion( true )
+		bumpVersion( true, false, false, false, "version" )
+		bumpVersion( true, false, false, false, "boxlangVersion" )
 	}
 }
 
@@ -287,7 +302,8 @@ task bumpMajorVersion {
  */
 task bumpMinorVersion {
 	doLast{
-		bumpVersion( false, true )
+		bumpVersion( false, true, false, false, "version" )
+		bumpVersion( false, true, false, false, "boxlangVersion" )
 	}
 }
 
@@ -296,6 +312,17 @@ task bumpMinorVersion {
  */
 task bumpPatchVersion {
 	doLast{
-		bumpVersion( false, false, true )
+		bumpVersion( false, false, true, false, "version" )
+		bumpVersion( false, false, true, false, "boxlangVersion" )
+	}
+}
+
+/**
+ * Bump the beta version number
+ */
+task bumpBetaVersion {
+	doLast{
+		bumpVersion( false, false, false, true, "version" )
+		bumpVersion( false, false, false, true, "boxlangVersion" )
 	}
 }
