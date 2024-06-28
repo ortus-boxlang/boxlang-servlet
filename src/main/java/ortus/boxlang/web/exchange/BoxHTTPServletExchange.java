@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -88,7 +89,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	/**
 	 * Create a new BoxLang HTTP exchange for a Servlet
-	 * 
+	 *
 	 * @param request  The servlet request
 	 * @param response The servlet response
 	 */
@@ -305,9 +306,8 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 		try {
 			if ( contentType.startsWith( "application/x-www-form-urlencoded" ) ) {
-				String requestBody = request.getReader().lines().collect( Collectors.joining( System.lineSeparator() ) );
-				System.out.println( "Request body: " + requestBody );
-				String[] pairs = requestBody.split( "&" );
+				String		requestBody	= request.getReader().lines().collect( Collectors.joining( System.lineSeparator() ) );
+				String[]	pairs		= requestBody.split( "&" );
 				for ( String pair : pairs ) {
 					int		idx		= pair.indexOf( "=" );
 					String	key		= URLDecoder.decode( pair.substring( 0, idx ), getCharacterEncodingOrDefault() );
