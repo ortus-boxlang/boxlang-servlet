@@ -161,7 +161,7 @@ jobs:
       - name: Publish to ForgeBox
         run: |
           cd build/forgebox
-          box package show && forgebox publish --force
+          box package show "&&" forgebox publish --force
 
       - name: Create Github Release
         uses: taiki-e/create-gh-release-action@v1.8.0
