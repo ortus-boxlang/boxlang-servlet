@@ -227,7 +227,8 @@ task buildRuntime( type: Copy ){
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.war" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}-all.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot-all.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 		} else {
-			Files.copy( file( "build/distributions/boxlang-servlet-${version}.zip" ).toPath(), file( "build/evergreen/boxlang-servlet-latest.zip" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war" ).toPath(), file( "build/evergreen/boxlang-servlet-latest.war" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( file( "build/distributions/boxlang-servlet-${version}-all.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-latest-all.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 		}
 
 		println "+ CommandBox Engine created in the build/forgebox folder, ready for publishing"
