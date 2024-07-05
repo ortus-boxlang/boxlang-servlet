@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.0.0-beta3...HEAD
 
+[1.0.0-beta4]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.0.0-beta4...v1.0.0-beta4
+
+
 [1.0.0-beta3]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.0.0-beta2...v1.0.0-beta3
 
 [1.0.0-beta2]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.0.0-beta2...v1.0.0-beta2
