@@ -1,7 +1,7 @@
 {
 	"name": "BoxLang CommandBox Engine",
 	"slug": "boxlang",
-	"version": "@build.version@+@build.number@",
+	"version": "@build.version@",
 	"type": "cf-engines",
 	"description": "The CommandBox Engine for BoxLang",
 	"createPackageDirectory": false,

@@ -2,7 +2,7 @@
     "name": "BoxLang Servlet Runtime",
     "shortDescription": "The BoxLang Servlet Runtime",
     "slug": "boxlang-servlet",
-    "version": "@build.version@+@build.number@",
+    "version": "@build.version@",
     "location": "https://downloads.ortussolutions.com/ortussolutions/boxlang-runtimes/boxlang-servlet/@build.version@/boxlang-servlet-@build.version@.zip",
     "author": "Ortus Solutions",
     "homepage": "https://github.com/ortus-boxlang/boxlang-servlet",
@@ -17,7 +17,7 @@
         "boxlang"
     ],
     "private": false,
-	"listed": false,
+    "listed": false,
     "license": [
         {
             "type": "Apache-2.0",

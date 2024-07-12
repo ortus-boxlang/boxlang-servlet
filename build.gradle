@@ -30,6 +30,13 @@ ext {
 	branch = System.getenv( 'BRANCH' ) ?: 'development'
 }
 
+if (branch == 'development') {
+    // If the branch is 'development', ensure the version ends with '-snapshot'
+    // This replaces any existing prerelease identifier with '-snapshot'
+    version = version.contains('-') ? version.replaceAll(/-.*/, '-snapshot') : "${version}-snapshot"
+	boxlangVersion = boxlangVersion.contains('-') ? boxlangVersion.replaceAll(/-.*/, '-snapshot') : "${boxlangVersion}-snapshot"
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -76,12 +83,8 @@ compileTestJava {
 jar {
     archiveVersion =  "${version}"
  	manifest {
-	   	attributes 'Description': 'The BoxLang Servlet Runtime'
-		 if( branch == 'development' ){
-		   attributes 'Implementation-Version': "${version}-SNAPSHOT"
-	   } else {
-		   attributes 'Implementation-Version': "${version}+${buildID}"
-	   }
+	   attributes 'Description': 'The BoxLang Servlet Runtime'
+	   attributes 'Implementation-Version': "${version}+${buildID}"
 	   attributes 'Created-On': new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( new Date() )
 	   attributes 'Created-By': "Ortus Solutions, Corp"
     }
@@ -119,13 +122,7 @@ processResources {
 	// Replace @build.date@ with the current date in META-INF/version.properties file
 	filter( ReplaceTokens, tokens: [ 'build.date': new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( new Date() ) ] )
 	// Replace @build.version@ with the current version in META-INF/version.properties file
-	filter( ReplaceTokens, tokens: [ 'build.version': version ] )
-	// If we are in branch == development then update +build.number to -SNAPSHOT
-	if( branch == 'development' ){
-		filter( ReplaceTokens, tokens: [ 'build.number': "-SNAPSHOT" ] )
-	} else {
-		filter( ReplaceTokens, tokens: [ 'build.number': "+" + buildID ] )
-	}
+	filter( ReplaceTokens, tokens: [ 'build.version': version + "+" + buildID ] )
 }
 
 javadoc {
@@ -186,11 +183,10 @@ task createWar( type: Copy ){
 		include "web.xml"
 		include "box.json"
 		// Token Replacements Go Here
-		filter{ line -> line.replaceAll( '@build.version@', project.version ) }
 		if( project.branch == "development" ){
-			filter{ line -> line.replaceAll( '\\+@build.number@', '-SNAPSHOT' ) }
+			filter{ line -> line.replaceAll( '@build.version@', project.version ) }
 		} else {
-			filter{ line -> line.replaceAll( '@build.number@', project.buildID ) }
+			filter{ line -> line.replaceAll( '@build.version@', project.version + "+" + project.buildID ) }
 		}
 		into "engine/WEB-INF"
 	}

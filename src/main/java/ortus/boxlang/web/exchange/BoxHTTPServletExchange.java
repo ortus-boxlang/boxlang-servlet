@@ -47,7 +47,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -97,6 +96,33 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		this.servletContext	= request.getServletContext();
 		this.request		= request;
 		this.response		= response;
+	}
+
+	/**
+	 * Get the servlet context
+	 * 
+	 * @return The servlet context
+	 */
+	public ServletContext getServletContext() {
+		return servletContext;
+	}
+
+	/**
+	 * Get the servlet request
+	 * 
+	 * @return The servlet request
+	 */
+	public HttpServletRequest getServletRequest() {
+		return request;
+	}
+
+	/**
+	 * Get the servlet response
+	 * 
+	 * @return The servlet response
+	 */
+	public HttpServletResponse getServletResponse() {
+		return response;
 	}
 
 	@Override
