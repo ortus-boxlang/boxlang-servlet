@@ -81,6 +81,10 @@ public class BoxLangServlet implements Servlet {
 		}
 		System.out.println( "Ortus BoxLang Servlet home: " + BLHome.toString() );
 		this.runtime = BoxRuntime.getInstance( debug, configPath, BLHome.toString() );
+
+		// Register the servlet mapping interceptor
+		this.runtime.getInterceptorService().register( new ServletMappingInterceptor( config.getServletContext() ) );
+
 		System.out.println( "Ortus BoxLang Servlet initialized!" );
 	}
 
