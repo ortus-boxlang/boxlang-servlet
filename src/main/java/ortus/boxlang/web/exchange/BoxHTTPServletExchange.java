@@ -310,7 +310,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				if ( !params.containsKey( key ) ) {
 					params.put( key, new LinkedList<String>() );
 				}
-				String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode( pair.substring( idx + 1 ), "UTF-8" ) : null;
+				String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode( pair.substring( idx + 1 ), "UTF-8" ) : "";
 				params.get( key ).add( value );
 			}
 
