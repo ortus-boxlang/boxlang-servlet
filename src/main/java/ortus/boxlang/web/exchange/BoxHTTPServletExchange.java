@@ -51,6 +51,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.output.NullWriter;
 
 import ortus.boxlang.runtime.scopes.Key;
 import ortus.boxlang.runtime.types.exceptions.BoxRuntimeException;
@@ -309,7 +310,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				if ( !params.containsKey( key ) ) {
 					params.put( key, new LinkedList<String>() );
 				}
-				String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode( pair.substring( idx + 1 ), "UTF-8" ) : null;
+				String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode( pair.substring( idx + 1 ), "UTF-8" ) : "";
 				params.get( key ).add( value );
 			}
 
@@ -506,6 +507,9 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			return response.getWriter();
 		} catch ( IOException e ) {
 			throw new BoxRuntimeException( "Could not get response writer", e );
+		} catch ( IllegalStateException e ) {
+			// reponse has already been sent, so return a dummy writer
+			return new PrintWriter( NullWriter.INSTANCE );
 		}
 	}
 
