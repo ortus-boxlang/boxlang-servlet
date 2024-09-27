@@ -172,6 +172,12 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	@Override
 	public void flushResponseBuffer() {
 		try {
+
+			var contentType = getResponseHeader( "Content-Type" );
+			if ( contentType == null || contentType.isEmpty() ) {
+				setResponseHeader( "Content-Type", "text/html;charset=UTF-8" );
+			}
+
 			response.flushBuffer();
 		} catch ( IOException e ) {
 			throw new BoxRuntimeException( "Could not flush response buffer", e );
