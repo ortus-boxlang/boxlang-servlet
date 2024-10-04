@@ -70,10 +70,13 @@ public class BoxLangServlet implements Servlet {
 			BLHome = Path.of( customHome );
 		}
 		// Null, if not exists
-		Boolean	debug		= Boolean.parseBoolean( config.getInitParameter( "boxlang-debug" ) );
+		Boolean	debug		= null;
+		String	debugParam	= config.getInitParameter( "boxlang-debug" );
+
 		// Null, if not exists. Must be absolute path.
 		String	configPath	= config.getInitParameter( "boxlang-config-path" );
-		if ( debug != null ) {
+		if ( debugParam != null ) {
+			debug = Boolean.parseBoolean( debugParam );
 			System.out.println( "Ortus BoxLang Servlet debug mode: " + debug );
 		}
 		if ( configPath != null ) {
