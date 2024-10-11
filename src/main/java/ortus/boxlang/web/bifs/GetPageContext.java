@@ -14,16 +14,14 @@
  */
 package ortus.boxlang.web.bifs;
 
-import javax.servlet.jsp.JspFactory;
 import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
 
 import ortus.boxlang.runtime.bifs.BIF;
 import ortus.boxlang.runtime.bifs.BoxBIF;
 import ortus.boxlang.runtime.context.IBoxContext;
 import ortus.boxlang.runtime.scopes.ArgumentsScope;
 import ortus.boxlang.runtime.scopes.Key;
-import ortus.boxlang.runtime.types.exceptions.BoxRuntimeException;
+import ortus.boxlang.servlet.BoxPageContext;
 import ortus.boxlang.web.context.WebRequestBoxContext;
 import ortus.boxlang.web.exchange.BoxHTTPServletExchange;
 
@@ -57,25 +55,19 @@ public class GetPageContext extends BIF {
 				if ( !requestContext.hasAttachment( page_context_attachment ) ) {
 					// Create a PageContext object
 					BoxHTTPServletExchange	exchange	= ( BoxHTTPServletExchange ) requestContext.getHTTPExchange();
-					JspFactory				jspFactory	= JspFactory.getDefaultFactory();
 
-					// Ensure the JspFactory is available (it should be in a servlet container)
-					if ( jspFactory != null ) {
-						// Create a PageContext for this request using the container's JSP engine
-						PageContext pageContext = jspFactory.getPageContext(
-						    exchange.getServlet(),
-						    exchange.getServletRequest(),
-						    exchange.getServletResponse(),
-						    null,
-						    true,
-						    JspWriter.DEFAULT_BUFFER,
-						    true
-						);
-						// Attach the PageContext to the request context so it's available for the duration of the request
-						requestContext.putAttachment( page_context_attachment, pageContext );
-					} else {
-						throw new BoxRuntimeException( "JspFactory is not available. This BIF can only be used in a servlet container." );
-					}
+					BoxPageContext			pageContext	= new BoxPageContext();
+					pageContext.initialize(
+					    exchange.getServlet(),
+					    exchange.getServletRequest(),
+					    exchange.getServletResponse(),
+					    null,
+					    true,
+					    JspWriter.DEFAULT_BUFFER,
+					    true
+					);
+					// Attach the PageContext to the request context so it's available for the duration of the request
+					requestContext.putAttachment( page_context_attachment, pageContext );
 				}
 			}
 		}
