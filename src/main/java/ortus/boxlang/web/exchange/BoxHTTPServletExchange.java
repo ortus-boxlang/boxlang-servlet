@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -68,6 +69,11 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	protected ServletContext		servletContext;
 
 	/**
+	 * The servlet
+	 */
+	protected Servlet				servlet;
+
+	/**
 	 * The servlet request
 	 */
 	protected HttpServletRequest	request;
@@ -93,10 +99,11 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	 * @param request  The servlet request
 	 * @param response The servlet response
 	 */
-	public BoxHTTPServletExchange( HttpServletRequest request, HttpServletResponse response ) {
+	public BoxHTTPServletExchange( HttpServletRequest request, HttpServletResponse response, Servlet servlet ) {
 		this.servletContext	= request.getServletContext();
 		this.request		= request;
 		this.response		= response;
+		this.servlet		= servlet;
 	}
 
 	/**
@@ -124,6 +131,15 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	 */
 	public HttpServletResponse getServletResponse() {
 		return response;
+	}
+
+	/**
+	 * Get the servlet
+	 * 
+	 * @return The servlet
+	 */
+	public Servlet getServlet() {
+		return servlet;
 	}
 
 	@Override
