@@ -12,7 +12,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
@@ -169,7 +168,7 @@ public class BoxPageContext extends PageContext {
 		this.request		= request;
 		this.response		= response;
 		this.application	= request.getServletContext();
-		this.session		= needsSession ? ( ( HttpServletRequest ) request ).getSession() : null;
+		this.session		= null;
 	}
 
 	@Override
