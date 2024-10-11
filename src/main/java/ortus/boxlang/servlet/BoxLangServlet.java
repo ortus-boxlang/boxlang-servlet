@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import ortus.boxlang.runtime.BoxRuntime;
 import ortus.boxlang.runtime.scopes.Key;
+import ortus.boxlang.runtime.types.IStruct;
 import ortus.boxlang.web.WebRequestExecutor;
 import ortus.boxlang.web.exchange.BoxHTTPServletExchange;
 
@@ -89,6 +90,10 @@ public class BoxLangServlet implements Servlet {
 		this.runtime.getInterceptorService().register( new ServletMappingInterceptor( config.getServletContext() ) );
 
 		System.out.println( "Ortus BoxLang Servlet initialized!" );
+		IStruct versionInfo = runtime.getVersionInfo();
+		System.out.println(
+		    "Ortus BoxLang Version: " + versionInfo.getAsString( Key.of( "version" ) ) + " (Built On: " + versionInfo.getAsString( Key.of( "buildDate" ) )
+		        + ")" );
 	}
 
 	/**
