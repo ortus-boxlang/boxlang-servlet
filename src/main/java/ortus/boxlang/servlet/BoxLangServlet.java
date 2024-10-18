@@ -94,6 +94,7 @@ public class BoxLangServlet implements Servlet {
 		System.out.println(
 		    "Ortus BoxLang Version: " + versionInfo.getAsString( Key.of( "version" ) ) + " (Built On: " + versionInfo.getAsString( Key.of( "buildDate" ) )
 		        + ")" );
+
 	}
 
 	/**
@@ -108,7 +109,7 @@ public class BoxLangServlet implements Servlet {
 	public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException {
 		// FusionReactor automatically tracks servlets
 		// Note: web root can be different every request if this is a multi-site server or using ModCFML
-		var exchange = new BoxHTTPServletExchange( ( HttpServletRequest ) req, ( HttpServletResponse ) res );
+		var exchange = new BoxHTTPServletExchange( ( HttpServletRequest ) req, ( HttpServletResponse ) res, this );
 		try {
 			WebRequestExecutor.execute( exchange, config.getServletContext().getRealPath( "/" ), false );
 		} finally {

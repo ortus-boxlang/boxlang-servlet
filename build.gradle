@@ -58,6 +58,11 @@ dependencies {
 
 	// Servlet API
 	implementation 'javax.servlet:javax.servlet-api:4.0.1'
+	// We only need these for the PageContext class
+	implementation 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
+	implementation 'javax.el:javax.el-api:3.0.0'
+
+
 
  	implementation 'commons-fileupload:commons-fileupload:1.5'
 
