@@ -94,6 +94,11 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	List<FileUpload>				fileUploads	= new ArrayList<FileUpload>();
 
 	/**
+	 * PrintWriter for the response that wraps the servlet's
+	 */
+	WhitespaceManagingPrintWriter	writer;
+
+	/**
 	 * Create a new BoxLang HTTP exchange for a Servlet
 	 *
 	 * @param request  The servlet request
@@ -194,6 +199,9 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				setResponseHeader( "Content-Type", "text/html;charset=UTF-8" );
 			}
 
+			// Update this in case the content type has changed
+			writer.setWhitespaceCompressionEnabled( boxContext.isWhitespaceCompressionEnabled() );
+			writer.flush();
 			response.flushBuffer();
 		} catch ( IOException e ) {
 			throw new BoxRuntimeException( "Could not flush response buffer", e );
@@ -525,14 +533,20 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	@Override
 	public PrintWriter getResponseWriter() {
-		try {
-			return response.getWriter();
-		} catch ( IOException e ) {
-			throw new BoxRuntimeException( "Could not get response writer", e );
-		} catch ( IllegalStateException e ) {
-			// reponse has already been sent, so return a dummy writer
-			return new PrintWriter( NullWriter.INSTANCE );
+		if ( writer == null ) {
+			PrintWriter servletWriter;
+
+			try {
+				servletWriter = response.getWriter();
+			} catch ( IOException e ) {
+				throw new BoxRuntimeException( "Could not get response writer", e );
+			} catch ( IllegalStateException e ) {
+				// reponse has already been sent, so return a dummy writer
+				servletWriter = new PrintWriter( NullWriter.INSTANCE );
+			}
+			writer = new WhitespaceManagingPrintWriter( servletWriter, boxContext.isWhitespaceCompressionEnabled() );
 		}
+		return writer;
 	}
 
 	@Override
