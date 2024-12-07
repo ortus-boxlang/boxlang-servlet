@@ -358,8 +358,8 @@ task packageWar( type: War ){
 		println "+ War created in the distributions folder"
 	}
 }
-task buildRuntime( type: Copy ){
-	dependsOn( packageWar )
+task buildRuntime( type: Copy, dependsOn: packageWar ){
+	finalizedBy( "zipEngine" )
 	from( 'build/distributions' ) {
 		include "${project.name}-${version}.war"
 		include "box.json"
@@ -378,6 +378,18 @@ task buildRuntime( type: Copy ){
 
 		println "+ CommandBox Engine created in the build/forgebox folder, ready for publishing"
 	}
+}
+
+/**
+ * ZIp up a test server
+ */
+task zipEngine( type: Zip ) {
+    archiveFileName = "boxlang-servlet-${version}.zip"
+    destinationDirectory = file( "build/forgebox" )
+    from( "build/forgebox" ) {
+        include "box.json"
+        include "*.war"
+    }
 }
 
 /**
