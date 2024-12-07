@@ -385,7 +385,7 @@ task buildRuntime( type: Copy, dependsOn: packageWar ){
  */
 task zipEngine( type: Zip ) {
     archiveFileName = "boxlang-servlet-${version}.zip"
-    destinationDirectory = file( "build/forgebox" )
+    destinationDirectory = file( "build/distributions" )
     from( "build/forgebox" ) {
         include "box.json"
         include "*.war"
