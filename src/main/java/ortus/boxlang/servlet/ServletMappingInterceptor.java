@@ -23,6 +23,7 @@ import javax.servlet.ServletContext;
 
 import ortus.boxlang.runtime.events.BaseInterceptor;
 import ortus.boxlang.runtime.events.InterceptionPoint;
+import ortus.boxlang.runtime.events.Interceptor;
 import ortus.boxlang.runtime.scopes.Key;
 import ortus.boxlang.runtime.types.IStruct;
 import ortus.boxlang.runtime.util.ResolvedFilePath;
@@ -30,13 +31,19 @@ import ortus.boxlang.runtime.util.ResolvedFilePath;
 /**
  * I allow paths to be expanded using the servlets mappings/resource manager
  */
+@Interceptor( autoLoad = false )
 public class ServletMappingInterceptor extends BaseInterceptor {
 
 	private ServletContext servletContext;
 
 	/**
+	 * No Arg-Constructor
+	 */
+	public ServletMappingInterceptor() {
+	}
+
+	/**
 	 * Constructor
-	 *
 	 */
 	public ServletMappingInterceptor( ServletContext servletContext ) {
 		this.servletContext = servletContext;
