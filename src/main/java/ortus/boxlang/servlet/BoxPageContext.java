@@ -5,18 +5,16 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.el.ELContext;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
+import jakarta.el.ELContext;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
 
 public class BoxPageContext extends PageContext {
 
@@ -230,18 +228,6 @@ public class BoxPageContext extends PageContext {
 			// out.flush();
 		}
 		request.getRequestDispatcher( path ).include( request, response );
-	}
-
-	@SuppressWarnings( "deprecation" )
-	@Override
-	public ExpressionEvaluator getExpressionEvaluator() {
-		throw new UnsupportedOperationException( "Not supported yet." );
-	}
-
-	@SuppressWarnings( "deprecation" )
-	@Override
-	public VariableResolver getVariableResolver() {
-		throw new UnsupportedOperationException( "Not supported yet." );
 	}
 
 	@Override

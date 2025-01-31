@@ -40,20 +40,17 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.jakarta.servlet5.JakartaServletFileUpload;
 import org.apache.commons.io.output.NullWriter;
 
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import ortus.boxlang.runtime.scopes.Key;
 import ortus.boxlang.runtime.types.exceptions.BoxRuntimeException;
 import ortus.boxlang.web.context.WebRequestBoxContext;
@@ -373,12 +370,12 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				}
 			} else if ( contentType.startsWith( "multipart/form-data" ) ) {
 
-				DiskFileItemFactory factory = new DiskFileItemFactory();
-				factory.setSizeThreshold( 0 ); // Set size threshold to 0 to store all items on disk
-				ServletFileUpload	upload	= new ServletFileUpload( factory );
+				DiskFileItemFactory											factory	= DiskFileItemFactory.builder().get();
+				JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>	upload	= new JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>(
+				    factory );
 
-				List<FileItem>		items	= upload.parseRequest( request );
-				for ( FileItem item : items ) {
+				List<DiskFileItem>											items	= upload.parseRequest( request );
+				for ( DiskFileItem item : items ) {
 					String name = item.getFieldName();
 					if ( item.isFormField() ) {
 						// This is a regular form field
@@ -386,12 +383,12 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 						params.computeIfAbsent( name, k -> new LinkedList<>() ).add( value );
 					} else {
 						// This is a file
-						File storeLocation = ( ( DiskFileItem ) item ).getStoreLocation();
+						Path storeLocation = item.getPath();
 						if ( storeLocation != null ) {
 							// A file was uploaded (it might be a 0KB file)
-							String filePath = storeLocation.getAbsolutePath();
+							String filePath = storeLocation.toString();
 							params.computeIfAbsent( name, k -> new LinkedList<>() ).add( filePath );
-							fileUploads.add( new FileUpload( Key.of( name ), Path.of( storeLocation.toURI() ), item.getName() ) );
+							fileUploads.add( new FileUpload( Key.of( name ), storeLocation, item.getName() ) );
 						} else {
 							// The file input field was left empty
 							params.computeIfAbsent( name, k -> new LinkedList<>() ).add( "" );
@@ -401,7 +398,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			}
 		} catch ( IllegalStateException e ) {
 			// if request is already read, we can't read it again
-		} catch ( FileUploadException | IOException e ) {
+		} catch ( IOException e ) {
 			throw new RuntimeException( "Could not parse form parameters", e );
 		}
 
