@@ -14,8 +14,7 @@
  */
 package ortus.boxlang.web.bifs;
 
-import javax.servlet.jsp.JspWriter;
-
+import jakarta.servlet.jsp.JspWriter;
 import ortus.boxlang.runtime.bifs.BIF;
 import ortus.boxlang.runtime.bifs.BoxBIF;
 import ortus.boxlang.runtime.context.IBoxContext;

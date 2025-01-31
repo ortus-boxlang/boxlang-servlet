@@ -19,8 +19,7 @@ package ortus.boxlang.servlet;
 
 import java.nio.file.Path;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import ortus.boxlang.runtime.events.BaseInterceptor;
 import ortus.boxlang.runtime.events.InterceptionPoint;
 import ortus.boxlang.runtime.events.Interceptor;

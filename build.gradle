@@ -50,22 +50,19 @@ dependencies {
 	// LOCAL DEVELOPMENT ONLY
 	// CHOOSE THE RIGHT LOCATION FOR YOUR LOCAL DEPENDENCIES
     implementation files( '../boxlang/build/libs/boxlang-' + boxlangVersion + '-all.jar' )
-	implementation files( '../boxlang-web-support/build/distributions/boxlang-web-support-' + boxlangVersion + '.jar' )
 
 	// Downloaded Dependencies
 	implementation files( 'src/test/resources/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
 	implementation files( 'src/test/resources/libs/boxlang-' + boxlangVersion + '-all.jar' )
 
 	// Servlet API
-	implementation 'javax.servlet:javax.servlet-api:4.0.1'
+	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 	// We only need these for the PageContext class
-	implementation 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
-	implementation 'javax.el:javax.el-api:3.0.0'
+	implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:4.0.0'
+	implementation 'jakarta.el:jakarta.el-api:5.0.0'
 
-
-
- 	implementation 'commons-fileupload:commons-fileupload:1.5'
-
+ 	implementation 'org.apache.commons:commons-fileupload2-jakarta-servlet5:2.0.0-M2'
+	
     // Testing Dependencies
     testImplementation "org.junit.jupiter:junit-jupiter:5.+"
 	testImplementation "org.mockito:mockito-core:5.+"
