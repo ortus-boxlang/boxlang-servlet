@@ -10,10 +10,8 @@ plugins {
     id "com.diffplug.spotless" version "7.0.2"
 	// https://github.com/harbby/gradle-serviceloader
     id "com.github.harbby.gradle.serviceloader" version "1.1.9"
-	// For building shadow jars with jdk 17 ONLY
-    //id 'com.github.johnrengelman.shadow' version '8.1.1'
-    // For building shadow jars using JDK 21 +, they had to fork
-    id "io.github.goooler.shadow" version "8.1.8"
+	// Shadow
+	id "com.gradleup.shadow" version "9.0.0-beta8"
     // Download task
     id "de.undercouch.download" version "5.6.0"
 	// Task visualizer
@@ -49,24 +47,25 @@ repositories {
 dependencies {
 	// LOCAL DEVELOPMENT ONLY
 	// CHOOSE THE RIGHT LOCATION FOR YOUR LOCAL DEPENDENCIES
-    implementation files( '../boxlang/build/libs/boxlang-' + boxlangVersion + '-all.jar' )
+    implementation files( '../boxlang/build/libs/boxlang-' + boxlangVersion + '.jar' )
 
 	// Downloaded Dependencies
 	implementation files( 'src/test/resources/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
-	implementation files( 'src/test/resources/libs/boxlang-' + boxlangVersion + '-all.jar' )
+	implementation files( 'src/test/resources/libs/boxlang-' + boxlangVersion + '.jar' )
 
 	// Servlet API
 	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 	// We only need these for the PageContext class
 	implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:4.0.0'
 	implementation 'jakarta.el:jakarta.el-api:5.0.0'
-
  	implementation 'org.apache.commons:commons-fileupload2-jakarta-servlet5:2.0.0-M2'
-	
+
     // Testing Dependencies
     testImplementation "org.junit.jupiter:junit-jupiter:5.+"
 	testImplementation "org.mockito:mockito-core:5.+"
 	testImplementation "com.google.truth:truth:1.+"
+	// Explicitly declare the JUnit platform launcher (to avoid deprecation)
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 java {
@@ -98,6 +97,7 @@ jar {
 }
 
 shadowJar {
+	archiveClassifier = ""
     destinationDirectory = file( "build/distributions" )
 	mergeServiceFiles()
 	exclude "schema/**"
@@ -317,7 +317,7 @@ task createWar( type: Copy ){
 	dependsOn( shadowJar )
 	// Move the runtime
 	from( "build/distributions" ) {
-		include "${project.name}-${version}-all.jar"
+		include "${project.name}-${version}.jar"
         into "engine/WEB-INF/lib"
     }
 	// License it up
@@ -367,10 +367,10 @@ task buildRuntime( type: Copy, dependsOn: packageWar ){
 		file( "build/evergreen" ).mkdirs()
 		if( branch == 'development' ){
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.war" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
-			Files.copy( file( "build/distributions/boxlang-servlet-${version}-all.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot-all.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( file( "build/distributions/boxlang-servlet-${version}.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 		} else {
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war" ).toPath(), file( "build/evergreen/boxlang-servlet-latest.war" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
-			Files.copy( file( "build/distributions/boxlang-servlet-${version}-all.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-latest-all.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( file( "build/distributions/boxlang-servlet-${version}.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-latest.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 		}
 
 		println "+ CommandBox Engine created in the build/forgebox folder, ready for publishing"
@@ -391,7 +391,7 @@ task zipEngine( type: Zip ) {
 
 /**
  * TEMPORARY until we publish to maven
- * Task to download the latest jar from https://ortus-temp.s3.amazonaws.com/jericho/libs/boxlang-1.0.0-all.jar
+ * Task to download the latest jar from https://ortus-temp.s3.amazonaws.com/jericho/libs/boxlang-1.0.0.jar
  */
 task downloadBoxLang( type: Download ) {
 	// Create the destination directory
@@ -400,7 +400,7 @@ task downloadBoxLang( type: Download ) {
 	}
 	// Configure the URLs of the files to download
 	src([
-		"https://downloads.ortussolutions.com/ortussolutions/boxlang/${boxlangVersion}/boxlang-${boxlangVersion}-all.jar",
+		"https://downloads.ortussolutions.com/ortussolutions/boxlang/${boxlangVersion}/boxlang-${boxlangVersion}.jar",
 		"https://downloads.ortussolutions.com/ortussolutions/boxlang-runtimes/boxlang-web-support/${boxlangVersion}/boxlang-web-support-${boxlangVersion}.jar"
 	])
 	// Specify the destination directories for the downloaded files
