@@ -607,9 +607,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	}
 
 	@Override
-	@SuppressWarnings( "deprecation" )
 	public void setResponseStatus( int sc, String sm ) {
-		response.setStatus( sc, sm );
+		// The latest JakartaEE spec has removed the version of setStatus() which accepts a custom status message
+		// as it's removed in the HTTP/2 and HTTP/3 specs. There is simply no way to do this any longer via the servlet API.
+		response.setStatus( sc );
 	}
 
 	@Override
