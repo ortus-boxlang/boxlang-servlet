@@ -363,9 +363,17 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				String		requestBody	= request.getReader().lines().collect( Collectors.joining( System.lineSeparator() ) );
 				String[]	pairs		= requestBody.split( "&" );
 				for ( String pair : pairs ) {
-					int		idx		= pair.indexOf( "=" );
-					String	key		= URLDecoder.decode( pair.substring( 0, idx ), getCharacterEncodingOrDefault() );
-					String	value	= URLDecoder.decode( pair.substring( idx + 1 ), getCharacterEncodingOrDefault() );
+					int idx = pair.indexOf( "=" );
+					// ignore empty names
+					if ( idx <= 0 ) {
+						continue;
+					}
+					String key = URLDecoder.decode( pair.substring( 0, idx ), getCharacterEncodingOrDefault() );
+					// Just in case, check again for empty names
+					if ( key.isEmpty() ) {
+						continue;
+					}
+					String value = URLDecoder.decode( pair.substring( idx + 1 ), getCharacterEncodingOrDefault() );
 					params.computeIfAbsent( key, k -> new LinkedList<>() ).add( value );
 				}
 			} else if ( contentType.startsWith( "multipart/form-data" ) ) {
