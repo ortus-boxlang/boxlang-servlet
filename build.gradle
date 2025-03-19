@@ -52,8 +52,8 @@ dependencies {
 		implementation files( '../boxlang-web-support/build/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
 	} else {
 		// Downloaded Dependencies
-		implementation files( 'src/test/resources/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
 		implementation files( 'src/test/resources/libs/boxlang-' + boxlangVersion + '.jar' )
+		implementation files( 'src/test/resources/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
 	}
 
 	// Servlet API
@@ -100,17 +100,13 @@ jar {
 }
 
 shadowJar {
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	archiveClassifier = ""
-    destinationDirectory = file( "build/distributions" )
+	destinationDirectory = file( "build/distributions" )
 	mergeServiceFiles()
 	exclude "schema/**"
 	exclude "org/antlr/v4/gui/**"
 	exclude "org/antlr/v4/gui/**"
 	exclude "com/ibm/icu/**"
-	// Part of the core shim, but uneeded in sevlet
-	exclude 'ortus/boxlang/web/bifs/GetPageContext$PageContext.class'
-	
 }
 build.dependsOn( shadowJar );
 
@@ -284,7 +280,6 @@ javadoc {
 	options.addBooleanOption( 'html5', true )
 }
 task zipJavadocs( type: Zip ) {
-	dependsOn javadoc
 	group "documentation"
 	from javadoc.destinationDir
 	archiveFileName = "${project.name}-javadocs-${version}.zip"
@@ -321,7 +316,8 @@ test {
  * Create the engine distribution
  */
 task createWar( type: Copy ){
-	dependsOn( shadowJar )
+	dependsOn( build, zipJavadocs, shadowJar )
+
 	// Move the runtime
 	from( "build/distributions" ) {
 		include "${project.name}-${version}.jar"
@@ -353,8 +349,7 @@ task createWar( type: Copy ){
 		println "+ Engine has been created in the build/engine folder"
 	}
 }
-task packageWar( type: War ){
-	dependsOn( createWar )
+task packageWar( type: War, dependsOn: createWar ){
 	archiveFileName = "${project.name}-${version}.war"
 	destinationDirectory = file( 'build/distributions' )
 	from( 'build/engine' )
@@ -415,6 +410,28 @@ task downloadBoxLang( type: Download ) {
     overwrite true
     onlyIfModified false
 }
+task repackBoxLangJar( type: Zip ) {
+    dependsOn downloadBoxLang
+
+    def jarFile = file( "src/test/resources/libs/boxlang-web-support-${boxlangVersion}.jar" )
+    def tempDir = file( "${buildDir}/tempJar" )
+
+    doFirst {
+        tempDir.mkdirs()
+        copy {
+            from zipTree(jarFile)
+            into tempDir
+            exclude 'ortus/boxlang/web/bifs/GetPageContext.class'
+            exclude 'ortus/boxlang/web/bifs/GetPageContext$PageContext.class'
+        }
+        jarFile.delete()
+    }
+
+    archiveFileName = "boxlang-web-support-${boxlangVersion}.jar"
+    destinationDirectory = file( "src/test/resources/libs" )
+    from tempDir
+}
+downloadBoxLang.finalizedBy( repackBoxLangJar )
 
 /**
  * Project Wide Helper function
