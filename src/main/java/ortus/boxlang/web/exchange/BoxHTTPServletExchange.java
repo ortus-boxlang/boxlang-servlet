@@ -110,7 +110,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	/**
 	 * Get the servlet context
-	 * 
+	 *
 	 * @return The servlet context
 	 */
 	public ServletContext getServletContext() {
@@ -119,7 +119,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	/**
 	 * Get the servlet request
-	 * 
+	 *
 	 * @return The servlet request
 	 */
 	public HttpServletRequest getServletRequest() {
@@ -128,7 +128,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	/**
 	 * Get the servlet response
-	 * 
+	 *
 	 * @return The servlet response
 	 */
 	public HttpServletResponse getServletResponse() {
@@ -137,7 +137,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	/**
 	 * Get the servlet
-	 * 
+	 *
 	 * @return The servlet
 	 */
 	public Servlet getServlet() {
@@ -166,6 +166,8 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	@Override
 	public void addResponseCookie( BoxCookie cookie ) {
 		Cookie c = new Cookie( cookie.getName(), cookie.getValue() );
+		// Make sure our cookies are RFC 2019 Compliant so that values are not encoded
+		c.setVersion( cookie.getVersion() );
 		if ( cookie.getDomain() != null )
 			c.setDomain( cookie.getDomain() );
 		if ( cookie.getPath() != null )
