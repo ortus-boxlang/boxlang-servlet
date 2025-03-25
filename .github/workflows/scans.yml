@@ -49,20 +49,22 @@ jobs:
           fi
 
       - name: Build it!
-        run: gradle clean jar
+        run: |
+          gradle downloadBoxLang
+          gradle build -x test
 
       - name: Scan generated packages
         uses: anchore/scan-action@v6
         id: securityscan
         with:
           path: "./build/libs"
-          output-format: table
           severity-cutoff: "high"
           by-cve: "true"
           fail-build: true
 
       - name: Upload Anchore Report
-        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ steps.securityscan.outputs.sarif }}
           category: "BoxLang-Servlet-${{ github.env.BRANCH }}"
