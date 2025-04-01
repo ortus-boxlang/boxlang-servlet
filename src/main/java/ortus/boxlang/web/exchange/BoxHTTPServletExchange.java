@@ -638,4 +638,9 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	public boolean isResponseStarted() {
 		return response.isCommitted();
 	}
+
+	@Override
+	public void reset() {
+		response.reset();
+	}
 }
