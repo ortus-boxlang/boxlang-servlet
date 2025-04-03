@@ -1,0 +1,70 @@
+name: Anchore-Grype Security Scans
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run this against the main branch every Monday at 5:30 AM
+    - cron: "30 5 * * 2"
+
+permissions: write-all
+
+env:
+  JDK: 21
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    # Checkout the main/release branch
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: ${{ env.JDK }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Setup Environment Variables For Build Process
+        id: current_version
+        run: |
+          # Read Version from gradle.properties
+          echo "VERSION=`grep '^version=' gradle.properties | cut -d'=' -f2`" >> $GITHUB_ENV
+
+          # Stable
+          echo "Github Ref is $GITHUB_REF"
+          echo "BRANCH=main" >> $GITHUB_ENV
+
+          # Snapshot
+          if [ $GITHUB_REF == 'refs/heads/development' ]
+          then
+            echo "BRANCH=development" >> $GITHUB_ENV
+          fi
+
+      - name: Build it!
+        run: |
+          gradle downloadBoxLang
+          gradle build -x test
+
+      - name: Scan generated packages
+        uses: anchore/scan-action@v6
+        id: securityscan
+        with:
+          path: "./build/libs"
+          severity-cutoff: "high"
+          by-cve: "true"
+          fail-build: true
+
+      - name: Upload Anchore Report
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.securityscan.outputs.sarif }}
+          category: "BoxLang-Servlet-${{ github.env.BRANCH }}"
