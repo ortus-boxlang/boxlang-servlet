@@ -165,7 +165,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	@Override
 	public void addResponseCookie( BoxCookie cookie ) {
-		Cookie c = new Cookie( cookie.getName(), cookie.getValue() );
+		Cookie c = new Cookie( cookie.getName(), cookie.getEncodedValue() );
 		// Make sure our cookies are RFC 2019 Compliant so that values are not encoded
 		c.setVersion( cookie.getVersion() );
 		if ( cookie.getDomain() != null )
@@ -253,7 +253,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		List<Cookie>	cookieList	= List.of( cookies );
 		List<BoxCookie>	boxCookies	= new ArrayList<>();
 		for ( Cookie cookie : cookieList ) {
-			var c = new BoxCookie( cookie.getName(), cookie.getValue() );
+			var c = BoxCookie.fromEncoded( cookie.getName(), cookie.getValue() );
 			if ( cookie.getDomain() != null )
 				c.setDomain( cookie.getDomain() );
 			if ( cookie.getPath() != null )
