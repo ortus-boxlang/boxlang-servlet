@@ -165,23 +165,29 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	@Override
 	public void addResponseCookie( BoxCookie cookie ) {
-		Cookie c = new Cookie( cookie.getName(), cookie.getValue() );
-		// Make sure our cookies are RFC 2019 Compliant so that values are not encoded
-		c.setVersion( cookie.getVersion() );
-		if ( cookie.getDomain() != null )
-			c.setDomain( cookie.getDomain() );
-		if ( cookie.getPath() != null )
-			c.setPath( cookie.getPath() );
-		c.setSecure( cookie.isSecure() );
-		c.setHttpOnly( cookie.isHttpOnly() );
-		if ( cookie.getMaxAge() != null )
-			c.setMaxAge( cookie.getMaxAge() );
-		// TODO: Does servlet not support these?
-		// c.setSameSite(cookie.isSameSite());
-		// c.setExpires(cookie.getExpires());
-		// c.setSameSiteMode(cookie.getSameSiteMode());
+		response.addHeader( "Set-Cookie", cookie.toSetCookieHeader() );
+		// We can't use the below until we starting using the Jakarta Servlet API 6.0 which supports setAttribute().
+		// The current servlet API 5.0 does not support samesite or expires attributes on cookies.
 
-		response.addCookie( c );
+		/*
+		 * Cookie c = new Cookie( cookie.getName(), cookie.getEncodedValue() );
+		 * // Make sure our cookies are RFC 2019 Compliant so that values are not encoded
+		 * c.setVersion( cookie.getVersion() );
+		 * if ( cookie.getDomain() != null )
+		 * c.setDomain( cookie.getDomain() );
+		 * if ( cookie.getPath() != null )
+		 * c.setPath( cookie.getPath() );
+		 * c.setSecure( cookie.isSecure() );
+		 * c.setHttpOnly( cookie.isHttpOnly() );
+		 * if ( cookie.getMaxAge() != null )
+		 * c.setMaxAge( cookie.getMaxAge() );
+		 * // TODO: Does servlet not support these?
+		 * // c.setSameSite(cookie.isSameSite());
+		 * // c.setExpires(cookie.getExpires());
+		 * // c.setSameSiteMode(cookie.getSameSiteMode());
+		 * 
+		 * response.addCookie( c );
+		 */
 	}
 
 	@Override
@@ -192,11 +198,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	@Override
 	public void flushResponseBuffer() {
 		try {
-
-			var contentType = getResponseHeader( "Content-Type" );
-			if ( contentType == null || contentType.isEmpty() ) {
-				setResponseHeader( "Content-Type", "text/html;charset=UTF-8" );
-			}
+			ensureResponseContentType();
 
 			// Update this in case the content type has changed
 			writer.setWhitespaceCompressionEnabled( boxContext.isWhitespaceCompressionEnabled() );
@@ -257,18 +259,8 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		List<Cookie>	cookieList	= List.of( cookies );
 		List<BoxCookie>	boxCookies	= new ArrayList<>();
 		for ( Cookie cookie : cookieList ) {
-			var c = new BoxCookie( cookie.getName(), cookie.getValue() );
-			if ( cookie.getDomain() != null )
-				c.setDomain( cookie.getDomain() );
-			if ( cookie.getPath() != null )
-				c.setPath( cookie.getPath() );
-			c.setSecure( cookie.getSecure() );
-			c.setHttpOnly( cookie.isHttpOnly() );
-			c.setMaxAge( cookie.getMaxAge() );
-			// TODO: Not supportd in servlet?
-			// c.setSameSite( cookie.getSameSite() );
-			// c.setExpires( cookie.getExpires() );
-			// c.setSameSiteMode( cookie.getSameSiteMode() );
+			// Only name and value are sent from the browser, so we don't bother with the other getters
+			var c = BoxCookie.fromEncoded( cookie.getName(), cookie.getValue() );
 			boxCookies.add( c );
 		}
 		return boxCookies.toArray( new BoxCookie[ 0 ] );
