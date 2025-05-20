@@ -1,4 +1,8 @@
 # This triggers testing on major libs so we can verify we did not break anything
+# These repos MUST HAVE:
+# - tests.yml workflow that is triggered by workflow_dispatch
+# - development branch
+# - A test for boxlang@be
 name: Trigger Box Tests
 
 on:
