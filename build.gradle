@@ -368,7 +368,7 @@ task buildRuntime( type: Copy, dependsOn: packageWar ){
 	doLast {
 		// Generate checksums for all zip and jar files in distributions folder
 		file( "build/distributions" ).listFiles().each { file ->
-			if ( file.name.endsWith( '.zip' ) || file.name.endsWith( '.jar' ) ) {
+			if ( file.name.endsWith( '.zip' ) || file.name.endsWith( '.jar' ) || file.name.endsWith( '.war' ) ) {
 				generateChecksum( file, 'SHA-256' )
 				generateChecksum( file, 'MD5' )
 			}
