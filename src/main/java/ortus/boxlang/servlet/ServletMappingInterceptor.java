@@ -54,8 +54,26 @@ public class ServletMappingInterceptor extends BaseInterceptor {
 	@InterceptionPoint
 	public void onMissingMapping( IStruct data ) {
 		String	path		= data.getAsString( Key.path );
-		// See if the servlet's resource manager can resolve the path
-		String	realPath	= servletContext.getRealPath( path );
+		// Check if path contains "..". If so, get the path leaing up to the first ".." and then resolve the rest of the path against that
+		// This is because the servlet's getRealPath() will not allow you to back up "above" the web root.
+		int		dotDotIndex	= path.indexOf( ".." );
+		String	realPath	= null;
+		if ( dotDotIndex >= 0 ) {
+			// Break off the part before ".."
+			String beforeDotDot = path.substring( 0, dotDotIndex );
+			realPath = servletContext.getRealPath( beforeDotDot );
+			if ( realPath != null ) {
+				// Process the rest of the path relative to realPath
+				String	afterDotDot	= path.substring( dotDotIndex );
+				Path	resolved	= Path.of( realPath ).resolve( afterDotDot ).normalize();
+				data.put( Key.resolvedFilePath,
+				    ResolvedFilePath.of( "/", servletContext.getRealPath( "/" ), Path.of( path ).normalize().toString(), resolved )
+				);
+			}
+			return;
+		}
+		// Fallback to normal processing
+		realPath = servletContext.getRealPath( path );
 		if ( realPath != null ) {
 			data.put( Key.resolvedFilePath,
 			    ResolvedFilePath.of( "/", servletContext.getRealPath( "/" ), Path.of( path ).normalize().toString(), Path.of( realPath ).normalize() )
