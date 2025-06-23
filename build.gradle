@@ -61,7 +61,7 @@ dependencies {
 	// We only need these for the PageContext class
 	implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:4.0.0'
 	implementation 'jakarta.el:jakarta.el-api:5.0.0'
- 	implementation 'org.apache.commons:commons-fileupload2-jakarta-servlet5:2.0.0-M3'
+ 	implementation 'org.apache.commons:commons-fileupload2-jakarta-servlet5:2.0.0-M4'
 
     // Testing Dependencies
     testImplementation "org.junit.jupiter:junit-jupiter:5.+"
