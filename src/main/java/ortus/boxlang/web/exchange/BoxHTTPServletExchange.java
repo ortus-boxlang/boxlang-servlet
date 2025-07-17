@@ -442,12 +442,16 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	public Object getRequestBody() {
 		try {
 			InputStream inputStream = request.getInputStream();
+
+			// FUSIONREACTOR BUG-- available() returns 0 EVEN WHEN THERE ARE ACTUALLY BYTES TO READ because they wrap the stupid input stream
+			// If the stream is actually read, we'll just have to hit the catch blow below instead of a nice pre-emptive check.
 			// If this stream has already been read, return an empty string
+
 			// TODO: Figure out how to intercept the input stream so we can access
 			// it even after the form scope has been processed.
-			if ( inputStream.available() == 0 ) {
-				return "";
-			}
+			// if ( inputStream.available() == 0 ) {
+			// return "";
+			// }
 			if ( isTextBasedContentType() ) {
 				try ( Scanner scanner = new java.util.Scanner( inputStream ).useDelimiter( "\\A" ) ) {
 					return scanner.next();
