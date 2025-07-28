@@ -457,7 +457,14 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 					return scanner.hasNext() ? scanner.next() : "";
 				}
 			} else {
-				return inputStream.readAllBytes();
+				var responseBytes = inputStream.readAllBytes();
+				// If there is no content type and no bytes, return an empty string
+				// The HTTP spec is ambgiuous about how to represent a non-existent body,
+				// so we just return an empty string in this case to follow historical precedent.
+				if ( responseBytes.length == 0 && getRequestContentType() == null ) {
+					return "";
+				}
+				return responseBytes;
 			}
 		} catch ( IOException | IllegalStateException e ) {
 			return "";
