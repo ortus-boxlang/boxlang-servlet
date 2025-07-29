@@ -316,6 +316,7 @@ test {
  * Create the engine distribution
  */
 task createWar( type: Copy ){
+	outputs.upToDateWhen { false }
 	dependsOn( build, zipJavadocs, shadowJar )
 
 	// Move the runtime

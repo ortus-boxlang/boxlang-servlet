@@ -574,10 +574,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		resetResponseBuffer();
 		try ( FileInputStream inputStream = new FileInputStream( file ) ) {
 			FileChannel	channel	= inputStream.getChannel();
-			ByteBuffer	buffer	= ByteBuffer.allocate( 1024 );
+			ByteBuffer	buffer	= ByteBuffer.allocate( 8192 );
 			while ( channel.read( buffer ) > 0 ) {
 				buffer.flip();
-				response.getOutputStream().write( buffer.array() );
+				response.getOutputStream().write( buffer.array(), 0, buffer.limit() );
 				buffer.clear();
 			}
 		} catch ( IOException e ) {
