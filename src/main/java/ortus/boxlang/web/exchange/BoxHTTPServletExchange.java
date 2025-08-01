@@ -372,7 +372,8 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				}
 			} else if ( contentType.startsWith( "multipart/form-data" ) ) {
 
-				DiskFileItemFactory											factory	= DiskFileItemFactory.builder().get();
+				DiskFileItemFactory											factory	= DiskFileItemFactory.builder()
+				    .setCharset( getCharacterEncodingOrDefault() ).get();
 				JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>	upload	= new JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>(
 				    factory );
 
@@ -408,6 +409,12 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		    .collect( Collectors.toMap( Map.Entry::getKey, e -> e.getValue().toArray( new String[ 0 ] ) ) );
 	}
 
+	/**
+	 * Get the character encoding for the request, or a default value if not set.
+	 * The default is UTF-8.
+	 * 
+	 * @return The character encoding for the request, or "UTF-8" if not set.
+	 */
 	public String getCharacterEncodingOrDefault() {
 		String encoding = request.getCharacterEncoding();
 		return encoding != null ? encoding : "UTF-8";
