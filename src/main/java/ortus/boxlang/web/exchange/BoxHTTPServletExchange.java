@@ -372,7 +372,8 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				}
 			} else if ( contentType.startsWith( "multipart/form-data" ) ) {
 
-				DiskFileItemFactory											factory	= DiskFileItemFactory.builder().get();
+				DiskFileItemFactory											factory	= DiskFileItemFactory.builder()
+				    .setCharset( getCharacterEncodingOrDefault() ).get();
 				JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>	upload	= new JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>(
 				    factory );
 
@@ -408,6 +409,12 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		    .collect( Collectors.toMap( Map.Entry::getKey, e -> e.getValue().toArray( new String[ 0 ] ) ) );
 	}
 
+	/**
+	 * Get the character encoding for the request, or a default value if not set.
+	 * The default is UTF-8.
+	 * 
+	 * @return The character encoding for the request, or "UTF-8" if not set.
+	 */
 	public String getCharacterEncodingOrDefault() {
 		String encoding = request.getCharacterEncoding();
 		return encoding != null ? encoding : "UTF-8";
@@ -442,18 +449,29 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	public Object getRequestBody() {
 		try {
 			InputStream inputStream = request.getInputStream();
+
+			// FUSIONREACTOR BUG-- available() returns 0 EVEN WHEN THERE ARE ACTUALLY BYTES TO READ because they wrap the stupid input stream
+			// If the stream is actually read, we'll just have to hit the catch blow below instead of a nice pre-emptive check.
 			// If this stream has already been read, return an empty string
+
 			// TODO: Figure out how to intercept the input stream so we can access
 			// it even after the form scope has been processed.
-			if ( inputStream.available() == 0 ) {
-				return "";
-			}
+			// if ( inputStream.available() == 0 ) {
+			// return "";
+			// }
 			if ( isTextBasedContentType() ) {
 				try ( Scanner scanner = new java.util.Scanner( inputStream ).useDelimiter( "\\A" ) ) {
-					return scanner.next();
+					return scanner.hasNext() ? scanner.next() : "";
 				}
 			} else {
-				return inputStream.readAllBytes();
+				var responseBytes = inputStream.readAllBytes();
+				// If there is no content type and no bytes, return an empty string
+				// The HTTP spec is ambgiuous about how to represent a non-existent body,
+				// so we just return an empty string in this case to follow historical precedent.
+				if ( responseBytes.length == 0 && getRequestContentType() == null ) {
+					return "";
+				}
+				return responseBytes;
 			}
 		} catch ( IOException | IllegalStateException e ) {
 			return "";
@@ -563,10 +581,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		resetResponseBuffer();
 		try ( FileInputStream inputStream = new FileInputStream( file ) ) {
 			FileChannel	channel	= inputStream.getChannel();
-			ByteBuffer	buffer	= ByteBuffer.allocate( 1024 );
+			ByteBuffer	buffer	= ByteBuffer.allocate( 8192 );
 			while ( channel.read( buffer ) > 0 ) {
 				buffer.flip();
-				response.getOutputStream().write( buffer.array() );
+				response.getOutputStream().write( buffer.array(), 0, buffer.limit() );
 				buffer.clear();
 			}
 		} catch ( IOException e ) {
