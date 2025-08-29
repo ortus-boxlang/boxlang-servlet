@@ -69,7 +69,7 @@ jobs:
       - name: Test Module
         run: |
           ./gradlew downloadBoxLang
-          ./gradlew test --stacktrace --console=plain
+          ./gradlew build test --stacktrace --console=plain
 
       - name: Publish Test Reports
         uses: mikepenz/action-junit-report@v5.6.2
