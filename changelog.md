@@ -34,3 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-04-30
 
 - https://boxlang.ortusbooks.com/readme/release-history/1.0.0
+
+* * *
+
+[unreleased]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/ortus-boxlang/boxlang-servlet/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/ortus-boxlang/boxlang-servlet/compare/48557184906eda841b837deec8f4182cdde359ad...v1.0.0
