@@ -11,7 +11,7 @@ plugins {
 	// https://github.com/harbby/gradle-serviceloader
     id "com.github.harbby.gradle.serviceloader" version "1.1.9"
 	// Shadow
-	id "com.gradleup.shadow" version "9.0.0-rc2"
+	id "com.gradleup.shadow" version "9.0.2"
     // Download task
     id "de.undercouch.download" version "5.6.0"
 	// Task visualizer
@@ -19,7 +19,7 @@ plugins {
 	// Maven Publisher
 	id 'maven-publish'
 	id 'signing'
-	id 'com.gradleup.nmcp' version "0.0.9"
+	id 'com.gradleup.nmcp.aggregation' version "1.1.0"
 }
 
 /**
@@ -102,13 +102,41 @@ jar {
 shadowJar {
 	archiveClassifier = ""
 	destinationDirectory = file( "build/distributions" )
+
+	// Configure duplicates strategy and service file merging for Shadow 9.0+
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 	mergeServiceFiles()
+
 	exclude "schema/**"
 	exclude "org/antlr/v4/gui/**"
 	exclude "org/antlr/v4/gui/**"
 	exclude "com/ibm/icu/**"
 }
-build.dependsOn( shadowJar );
+
+/**
+ * Test task to verify that service files are properly merged in the shadow JAR
+ */
+task testServiceFileMerging( type: Test ) {
+	description = 'Validates that the Shadow JAR contains all merged service files from dependencies'
+	group = 'verification'
+	
+	// Only run the service file merging test
+	useJUnitPlatform()
+	include '**/ServiceFileMergingTest.class'
+	
+	// Make sure the shadowJar is built first
+	dependsOn shadowJar
+	
+	// Don't run this as part of the normal test task
+	// It's specifically for validating the final artifact
+	
+	doFirst {
+		println "🔍 Testing Shadow JAR service file merging..."
+	}
+}
+
+// Add service file validation to the build process
+build.dependsOn( shadowJar, testServiceFileMerging );
 
 /**
  * Publish the artifacts to the local maven repository
@@ -228,24 +256,38 @@ publishing {
     }
 }
 
-nmcp {
-  publishAllProjectsProbablyBreakingProjectIsolation {
-    username = System.getenv( "MAVEN_USERNAME" ) ?: project.findProperty( "maven_username" )
-    password = System.getenv( "MAVEN_PASSWORD" ) ?: project.findProperty( "maven_password" )
-    // publish manually from the portal
-    //publicationType = "USER_MANAGED"
-    // or if you want to publish automatically
-    publicationType = "AUTOMATIC"
-  }
+/**
+ * Maven Central Publishing
+ * Plugin Information here: https://github.com/gradleup/nmcp
+ */
+nmcpAggregation {
+	centralPortal {
+		username = System.getenv( "MAVEN_USERNAME" ) ?: findProperty( "maven_username" )
+		password = System.getenv( "MAVEN_PASSWORD" ) ?: findProperty( "maven_password" )
+		// Manual release from the Portal UI:
+		// publishingType = "USER_MANAGED"
+		// Or auto-release:
+		publishingType = "AUTOMATIC"
+	}
+
+	// Publishes all subprojects that apply 'maven-publish'
+  	publishAllProjectsProbablyBreakingProjectIsolation()
 }
 
 /**
- * Digital Signing of assets
+ * Digital Signing of assets using the ortus GPG Key
  */
 signing {
-	def signingKey = System.getenv("GPG_KEY") ?: project.findProperty("signing.keyId")
-	def signingPassword = System.getenv("GPG_PASSWORD") ?: project.findProperty("signing.password")
-    useInMemoryPgpKeys(signingKey, signingPassword)
+	// Check if we have environment variables for in-memory PGP keys (CI/CD)
+	def gpgKey = System.getenv( "GPG_KEY" )
+	def gpgPassword = System.getenv( "GPG_PASSWORD" )
+
+	if ( gpgKey && gpgPassword ) {
+		// Use in-memory PGP keys for CI/CD
+		useInMemoryPgpKeys( gpgKey, gpgPassword )
+	}
+	// Otherwise use traditional gradle.properties approach for local development
+
     sign publishing.publications.shadow
 }
 
