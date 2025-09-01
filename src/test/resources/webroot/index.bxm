@@ -1,0 +1,13 @@
+<bx:script>
+// Test various BoxLang features to ensure they work in servlet environment
+testResults = {
+    "status": "success",
+    "message": "BoxLang servlet is working!",
+    "timestamp": now(),
+    "environment": "integration-test",
+    "functions" : getFunctionList(),
+    "components" : getComponentList()
+};
+</bx:script>
+<bx:content type="application/json" reset=true>
+<bx:output>#jsonSerialize( testResults )#</bx:output>

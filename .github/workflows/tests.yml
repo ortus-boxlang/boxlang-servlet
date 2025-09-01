@@ -71,12 +71,18 @@ jobs:
           ./gradlew downloadBoxLang
           ./gradlew build test --stacktrace --console=plain
 
+      - name: Run Integration Tests
+        run: |
+          ./gradlew testServer --stacktrace --console=plain
+        continue-on-error: false
+
       - name: Publish Test Reports
         uses: mikepenz/action-junit-report@v5.6.2
         if: always()
         with:
           report_paths: |
             **/build/test-results/test/*.xml
+            **/build/test-results/testServer/*.xml
             **/surefire-reports/*.xml
             **/failsafe-reports/*.xml
           check_name: "JUnit Report ${{ matrix.os }}-${{ matrix.jdkVersion }}"

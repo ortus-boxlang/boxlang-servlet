@@ -1,3 +1,20 @@
+/**
+ * [BoxLang]
+ *
+ * Copyright [2023] [Ortus Solutions, Corp]
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package ortus.boxlang.servlet;
 
 import java.io.IOException;
@@ -16,6 +33,34 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.PageContext;
 
+/**
+ * BoxPageContext provides a custom implementation of Jakarta Servlet's PageContext
+ * for the BoxLang servlet environment.
+ *
+ * This class manages page-scoped attributes and provides access to various servlet
+ * contexts including request, response, session, and application scopes. It serves
+ * as a bridge between the BoxLang runtime and the Jakarta Servlet API.
+ *
+ * Key features:
+ * - Manages page-scoped attributes in a local HashMap
+ * - Provides attribute access across all four scopes (page, request, session, application)
+ * - Supports attribute searching with findAttribute() following scope hierarchy
+ * - Handles servlet request forwarding and including
+ * - Implements proper resource cleanup via release() method
+ *
+ * Scope hierarchy for attribute resolution:
+ * 1. Page scope (local HashMap)
+ * 2. Request scope
+ * 3. Session scope (if session exists)
+ * 4. Application scope
+ *
+ * Note: Some methods like getELContext() and handlePageException() are not yet
+ * implemented and will throw UnsupportedOperationException.
+ *
+ * @author Ortus Solutions, Corp
+ *
+ * @since 1.0.0
+ */
 public class BoxPageContext extends PageContext {
 
 	private final Map<String, Object>	pageAttributes	= new HashMap<>();
