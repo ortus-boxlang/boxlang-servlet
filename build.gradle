@@ -57,10 +57,10 @@ dependencies {
 	}
 
 	// Servlet API
-	implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+	compileOnly 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 	// We only need these for the PageContext class
-	implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:4.0.0'
-	implementation 'jakarta.el:jakarta.el-api:5.0.0'
+	compileOnly 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:4.0.0'
+	compileOnly 'jakarta.el:jakarta.el-api:5.0.0'
  	implementation 'org.apache.commons:commons-fileupload2-jakarta-servlet5:2.0.0-M4'
 
     // Testing Dependencies
@@ -69,6 +69,13 @@ dependencies {
 	testImplementation "com.google.truth:truth:1.+"
 	// Explicitly declare the JUnit platform launcher (to avoid deprecation)
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+	// Integration Testing Dependencies (for testServer task)
+	testImplementation "org.eclipse.jetty:jetty-server:11.0.15"
+	testImplementation "org.eclipse.jetty:jetty-webapp:11.0.15"
+	testImplementation "org.eclipse.jetty:jetty-servlet:11.0.15"
+	testImplementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
+	testImplementation "org.apache.httpcomponents.core5:httpcore5:5.2.4"
 }
 
 java {
@@ -119,17 +126,17 @@ shadowJar {
 task testServiceFileMerging( type: Test ) {
 	description = 'Validates that the Shadow JAR contains all merged service files from dependencies'
 	group = 'verification'
-	
+
 	// Only run the service file merging test
 	useJUnitPlatform()
 	include '**/ServiceFileMergingTest.class'
-	
+
 	// Make sure the shadowJar is built first
 	dependsOn shadowJar
-	
+
 	// Don't run this as part of the normal test task
 	// It's specifically for validating the final artifact
-	
+
 	doFirst {
 		println "🔍 Testing Shadow JAR service file merging..."
 	}
@@ -352,6 +359,9 @@ test {
     testLogging {
 		showStandardStreams = true
 	}
+	// Exclude integration tests from regular test task
+	// Integration tests should only run via the 'testServer' task
+	exclude '**/integration/**'
 }
 
 /**
@@ -438,6 +448,47 @@ task buildRuntime( type: Copy, dependsOn: packageWar ){
 
 		println "+ CommandBox Engine created in the build/forgebox folder, ready for publishing"
 	}
+}
+
+/**
+ * Integration test task that deploys the WAR to an embedded Jetty server
+ * and verifies BoxLang template execution
+ */
+task testServer( type: Test ) {
+	description = 'Runs integration tests by deploying the WAR to an embedded server'
+	group = 'verification'
+
+	// Only run the integration test
+	useJUnitPlatform()
+	include '**/integration/ServletIntegrationTest.class'
+
+	// Make sure the WAR is built first
+	dependsOn buildRuntime
+
+	// Don't run this as part of the normal test task
+	// It's specifically for integration testing the deployed WAR
+
+	// Configure test logging to show essential output without verbose HTTP details
+	testLogging {
+		showStandardStreams = true
+		events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+		exceptionFormat = 'short'
+		showExceptions = true
+		showCauses = true
+		showStackTraces = false
+	}
+
+	doFirst {
+		println "🚀 Starting integration test with embedded server..."
+		println "📦 Testing WAR deployment and BoxLang execution..."
+	}
+
+	doLast {
+		println "✅ Integration test completed successfully!"
+	}
+
+	// Increase test timeout for server startup
+	systemProperty 'junit.jupiter.execution.timeout.default', '180s'
 }
 
 /**
