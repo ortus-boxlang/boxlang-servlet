@@ -373,7 +373,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			} else if ( contentType.startsWith( "multipart/form-data" ) ) {
 
 				DiskFileItemFactory											factory	= DiskFileItemFactory.builder()
-				    .setCharset( getCharacterEncodingOrDefault() ).get();
+				    .setCharset( getCharacterEncodingOrDefault() )
+				    // Write all file uploads to disk
+				    .setBufferSize( 0 )
+				    .get();
 				JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>	upload	= new JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>(
 				    factory );
 
