@@ -197,51 +197,6 @@ public class ServletIntegrationTest {
 		}
 	}
 
-	private void debugWebappDirectory() {
-		System.out.println( "\n🔍 Debugging webapp directory structure:" );
-
-		File extractDir = webAppContext.getTempDirectory();
-		System.out.println( "Temp directory: " + extractDir.getAbsolutePath() );
-
-		// List contents of temp directory
-		if ( extractDir.exists() ) {
-			System.out.println( "Temp directory contents:" );
-			listDirectoryContents( extractDir, "  " );
-		}
-
-		// Find the webapp directory
-		File webappDir = new File( extractDir, "webapp" );
-		if ( webappDir.exists() ) {
-			System.out.println( "\nWebapp directory contents:" );
-			listDirectoryContents( webappDir, "  " );
-		} else {
-			System.out.println( "❌ Webapp directory not found at: " + webappDir.getAbsolutePath() );
-		}
-
-		// Check for index.bxm
-		File indexFile = new File( webappDir, "index.bxm" );
-		System.out.println( "\n🔍 Looking for index.bxm at: " + indexFile.getAbsolutePath() );
-		System.out.println( "File exists: " + indexFile.exists() );
-		if ( indexFile.exists() ) {
-			System.out.println( "File size: " + indexFile.length() + " bytes" );
-		}
-	}
-
-	private void listDirectoryContents( File dir, String indent ) {
-		if ( !dir.isDirectory() )
-			return;
-
-		File[] files = dir.listFiles();
-		if ( files != null ) {
-			for ( File file : files ) {
-				System.out.println( indent + ( file.isDirectory() ? "📁 " : "📄 " ) + file.getName() );
-				if ( file.isDirectory() && !file.getName().startsWith( "." ) ) {
-					listDirectoryContents( file, indent + "  " );
-				}
-			}
-		}
-	}
-
 	private void waitForStartup() throws InterruptedException {
 		// Give Jetty some time to fully start and extract the WAR
 		Thread.sleep( 3000 );
