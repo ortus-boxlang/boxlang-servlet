@@ -73,7 +73,7 @@ dependencies {
 	testImplementation "org.eclipse.jetty:jetty-webapp:11.0.26"
 	testImplementation "org.eclipse.jetty:jetty-servlet:11.0.26"
 	testImplementation "org.apache.httpcomponents.client5:httpclient5:5.5"
-	testImplementation "org.apache.httpcomponents.core5:httpcore5:5.3.5"
+	testImplementation "org.apache.httpcomponents.core5:httpcore5:5.3.6"
 }
 
 java {
