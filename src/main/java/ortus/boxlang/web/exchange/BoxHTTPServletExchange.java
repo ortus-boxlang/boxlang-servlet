@@ -185,7 +185,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		 * // c.setSameSite(cookie.isSameSite());
 		 * // c.setExpires(cookie.getExpires());
 		 * // c.setSameSiteMode(cookie.getSameSiteMode());
-		 * 
+		 *
 		 * response.addCookie( c );
 		 */
 	}
@@ -347,8 +347,12 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		Map<String, List<String>>	params		= new HashMap<>();
 
 		String						contentType	= request.getContentType();
-		// We can only parse form fields if this is a POST request with a form content type
-		if ( !getRequestMethod().equalsIgnoreCase( "POST" ) || contentType == null ) {
+		// We can only parse form fields if this is a POST, PUT, PATCH, or DELETE request with a form content type
+		if ( contentType == null ||
+		    ( !getRequestMethod().equalsIgnoreCase( "POST" ) &&
+		        !getRequestMethod().equalsIgnoreCase( "PUT" ) &&
+		        !getRequestMethod().equalsIgnoreCase( "PATCH" ) &&
+		        !getRequestMethod().equalsIgnoreCase( "DELETE" ) ) ) {
 			return Collections.emptyMap();
 		}
 
@@ -373,7 +377,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			} else if ( contentType.startsWith( "multipart/form-data" ) ) {
 
 				DiskFileItemFactory											factory	= DiskFileItemFactory.builder()
-				    .setCharset( getCharacterEncodingOrDefault() ).get();
+				    .setCharset( getCharacterEncodingOrDefault() )
+				    // Write all file uploads to disk
+				    .setBufferSize( 0 )
+				    .get();
 				JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>	upload	= new JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>(
 				    factory );
 
@@ -412,7 +419,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	/**
 	 * Get the character encoding for the request, or a default value if not set.
 	 * The default is UTF-8.
-	 * 
+	 *
 	 * @return The character encoding for the request, or "UTF-8" if not set.
 	 */
 	public String getCharacterEncodingOrDefault() {
