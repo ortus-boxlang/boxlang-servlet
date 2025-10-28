@@ -378,8 +378,6 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 				DiskFileItemFactory											factory	= DiskFileItemFactory.builder()
 				    .setCharset( getCharacterEncodingOrDefault() )
-				    // Write all file uploads to disk
-				    .setBufferSize( 0 )
 				    .get();
 				JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>	upload	= new JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory>(
 				    factory );
@@ -389,11 +387,24 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 					String name = item.getFieldName();
 					if ( item.isFormField() ) {
 						// This is a regular form field
+						// Whether or not the value was buffered in memory or to disk, getString() will work
 						String value = item.getString();
 						params.computeIfAbsent( name, k -> new LinkedList<>() ).add( value );
+					} else if ( item.getName() == null || item.getName().isEmpty() ) {
+						// The file input field was left empty
+						params.computeIfAbsent( name, k -> new LinkedList<>() ).add( "" );
+					} else if ( item.isInMemory() ) {
+						// Small files buffered in memory need to be manually written to a temp file
+						// so we have a Path to return
+						Path tempFile = java.nio.file.Files.createTempFile( "boxlang-upload-", null );
+						item.write( tempFile );
+						String filePath = tempFile.toString();
+						params.computeIfAbsent( name, k -> new LinkedList<>() ).add( filePath );
+						fileUploads.add( new FileUpload( Key.of( name ), tempFile, item.getName() ) );
 					} else {
 						// This is a file
 						Path storeLocation = item.getPath();
+						// I don't think this will ever be null here, but just in case
 						if ( storeLocation != null ) {
 							// A file was uploaded (it might be a 0KB file)
 							String filePath = storeLocation.toString();
