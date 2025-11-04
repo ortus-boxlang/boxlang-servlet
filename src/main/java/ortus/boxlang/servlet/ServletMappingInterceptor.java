@@ -53,30 +53,71 @@ public class ServletMappingInterceptor extends BaseInterceptor {
 	 */
 	@InterceptionPoint
 	public void onMissingMapping( IStruct data ) {
-		String	path		= data.getAsString( Key.path );
-		// Check if path contains "..". If so, get the path leaing up to the first ".." and then resolve the rest of the path against that
+		String	path			= data.getAsString( Key.path );
+		// Check if path contains "..". If so, get the path leading up to the first ".." and then resolve the rest of the path against that
 		// This is because the servlet's getRealPath() will not allow you to back up "above" the web root.
-		int		dotDotIndex	= path.indexOf( ".." );
-		String	realPath	= null;
+		int		dotDotIndex		= path.indexOf( ".." );
+		String	realPath		= null;
+
+		Path	resolvedPath	= null;
+
+		String	mappingName;
+		String	mappingPath;
+
+		// We need special handling for paths with ".." in them
 		if ( dotDotIndex >= 0 ) {
 			// Break off the part before ".."
 			String beforeDotDot = path.substring( 0, dotDotIndex );
 			realPath = servletContext.getRealPath( beforeDotDot );
 			if ( realPath != null ) {
 				// Process the rest of the path relative to realPath
-				String	afterDotDot	= path.substring( dotDotIndex );
-				Path	resolved	= Path.of( realPath ).resolve( afterDotDot ).normalize();
-				data.put( Key.resolvedFilePath,
-				    ResolvedFilePath.of( "/", servletContext.getRealPath( "/" ), Path.of( path ).normalize().toString(), resolved )
-				);
+				String afterDotDot = path.substring( dotDotIndex );
+				resolvedPath = Path.of( realPath ).resolve( afterDotDot ).normalize();
 			}
-			return;
+		} else {
+			// Paths with out .. are simpler
+			realPath = servletContext.getRealPath( path );
+			if ( realPath != null ) {
+				resolvedPath = Path.of( realPath ).normalize();
+			}
 		}
-		// Fallback to normal processing
-		realPath = servletContext.getRealPath( path );
-		if ( realPath != null ) {
+
+		// if resolvedPath is non-null here, then it means we have a match. The logic for determining the mapping name/path is the same
+		if ( resolvedPath != null ) {
+			// The web root for this site
+			String	rootPath		= servletContext.getRealPath( "/" );
+			Path	relativePath	= Path.of( path ).normalize();
+
+			// If the resolved path is inside the web root, then we'll assume the root mapping
+			if ( resolvedPath.startsWith( rootPath ) ) {
+				mappingName	= "/";
+				mappingPath	= rootPath;
+			} else {
+				// If it's outside the web root, then there really is no mapping to use, so we'll just use the parent folder of the file
+				Path	relativePathParent	= relativePath.getParent();
+				Path	resolvedPathParent	= resolvedPath.getParent();
+				mappingName	= relativePathParent != null ? relativePathParent.toString() : "/";
+				mappingPath	= resolvedPathParent != null ? resolvedPathParent.toString() : resolvedPath.getRoot().toString();
+			}
+			/*
+			 * 
+			 * Ex:
+			 * mappingName /tests/
+			 * mappingPath C:\sandbox\appTemplate\tests\
+			 * relativePath /tests/runner.bxm
+			 * absolutePath C:\sandbox\appTemplate\tests\runner.bxm
+			 * 
+			 * It's important that the absolute path is actually under the mapping path.
+			 */
+
 			data.put( Key.resolvedFilePath,
-			    ResolvedFilePath.of( "/", servletContext.getRealPath( "/" ), Path.of( path ).normalize().toString(), Path.of( realPath ).normalize() )
+			    // The servlet already makes the path "real", so we can use ofReal() for better performance
+			    ResolvedFilePath.ofReal(
+			        mappingName,
+			        mappingPath,
+			        relativePath.toString(),
+			        resolvedPath
+			    )
 			);
 		}
 	}
