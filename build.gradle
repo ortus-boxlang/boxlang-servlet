@@ -539,26 +539,50 @@ task downloadBoxLang( type: Download ) {
     overwrite true
     onlyIfModified false
 }
-task repackBoxLangJar( type: Zip ) {
+task repackBoxLangJar {
     dependsOn downloadBoxLang
-
-    def jarFile = file( "src/test/resources/libs/boxlang-web-support-${boxlangVersion}.jar" )
-    def tempDir = file( "${buildDir}/tempJar" )
-
-    doFirst {
+    
+    def jarFile = file("src/test/resources/libs/boxlang-web-support-${boxlangVersion}.jar")
+    def tempDir = file("${buildDir}/tempJar")
+    
+    // Set up proper inputs/outputs for incremental builds
+    inputs.file jarFile
+    outputs.file jarFile
+    
+    doLast {
+        if (!jarFile.exists()) {
+            throw new GradleException("Source JAR file does not exist: ${jarFile}")
+        }
+        
+        println "🔧 Repackaging ${jarFile.name} to remove conflicting GetPageContext classes..."
+        
+        // Clean and create temp directory
+        if (tempDir.exists()) {
+            tempDir.deleteDir()
+        }
         tempDir.mkdirs()
+        
+        // Extract JAR contents excluding the problematic classes
         copy {
             from zipTree(jarFile)
             into tempDir
             exclude 'ortus/boxlang/web/bifs/GetPageContext.class'
             exclude 'ortus/boxlang/web/bifs/GetPageContext$PageContext.class'
         }
+        
+        // Delete the original JAR
         jarFile.delete()
+        
+        // Create new JAR from filtered contents
+        ant.jar(destfile: jarFile.absolutePath) {
+            fileset(dir: tempDir.absolutePath)
+        }
+        
+        // Clean up temp directory
+        tempDir.deleteDir()
+        
+        println "✅ Successfully repackaged JAR without GetPageContext classes"
     }
-
-    archiveFileName = "boxlang-web-support-${boxlangVersion}.jar"
-    destinationDirectory = file( "src/test/resources/libs" )
-    from tempDir
 }
 downloadBoxLang.finalizedBy( repackBoxLangJar )
 
