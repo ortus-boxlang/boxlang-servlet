@@ -96,6 +96,16 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	WhitespaceManagingPrintWriter	writer;
 
 	/**
+	 * Cache of the form fields
+	 */
+	Map<String, String[]>			formFields	= null;
+
+	/**
+	 * Cache of the url params
+	 */
+	Map<String, String[]>			urlParams	= null;
+
+	/**
 	 * Create a new BoxLang HTTP exchange for a Servlet
 	 *
 	 * @param request  The servlet request
@@ -316,9 +326,14 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	@Override
 	public Map<String, String[]> getRequestURLMap() {
+		if ( urlParams != null ) {
+			return urlParams;
+		}
+
 		String queryString = request.getQueryString();
 		if ( queryString == null ) {
-			return Collections.emptyMap();
+			urlParams = Collections.emptyMap();
+			return urlParams;
 		}
 
 		try {
@@ -335,8 +350,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				params.get( key ).add( value );
 			}
 
-			return params.entrySet().stream()
+			urlParams = params.entrySet().stream()
 			    .collect( Collectors.toMap( Map.Entry::getKey, e -> e.getValue().toArray( new String[ 0 ] ) ) );
+
+			return urlParams;
 		} catch ( UnsupportedEncodingException e ) {
 			throw new BoxRuntimeException( "Could not decode URL", e );
 		}
@@ -344,6 +361,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	@Override
 	public Map<String, String[]> getRequestFormMap() {
+		if ( formFields != null ) {
+			return formFields;
+		}
+
 		Map<String, List<String>>	params		= new HashMap<>();
 
 		String						contentType	= request.getContentType();
@@ -353,7 +374,8 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 		        !getRequestMethod().equalsIgnoreCase( "PUT" ) &&
 		        !getRequestMethod().equalsIgnoreCase( "PATCH" ) &&
 		        !getRequestMethod().equalsIgnoreCase( "DELETE" ) ) ) {
-			return Collections.emptyMap();
+			formFields = Collections.emptyMap();
+			return formFields;
 		}
 
 		try {
@@ -423,8 +445,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			throw new RuntimeException( "Could not parse form parameters", e );
 		}
 
-		return params.entrySet().stream()
+		formFields = params.entrySet().stream()
 		    .collect( Collectors.toMap( Map.Entry::getKey, e -> e.getValue().toArray( new String[ 0 ] ) ) );
+
+		return formFields;
 	}
 
 	/**
