@@ -181,7 +181,7 @@ jobs:
           box package show "&&" forgebox publish --force
 
       - name: Create Github Release
-        uses: taiki-e/create-gh-release-action@v1.9.1
+        uses: taiki-e/create-gh-release-action@v1.9.2
         continue-on-error: true
         if: env.SNAPSHOT == 'false'
         id: create_release
