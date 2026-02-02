@@ -612,7 +612,14 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 	public void sendResponseBinary( byte[] data ) {
 		resetResponseBuffer();
 		try {
-			response.getOutputStream().write( data );
+			var			out			= response.getOutputStream();
+			final int	bufferSize	= 8192;
+			int			offset		= 0;
+			while ( offset < data.length ) {
+				int len = Math.min( bufferSize, data.length - offset );
+				out.write( data, offset, len );
+				offset += len;
+			}
 		} catch ( IOException e ) {
 			throw new BoxRuntimeException( "Could not send binary response", e );
 		}
