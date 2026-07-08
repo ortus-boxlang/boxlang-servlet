@@ -82,6 +82,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 
 	/**
 	 * The BoxLang context for this request
+	 * This can be null if the request errors out very early
 	 */
 	protected WebRequestBoxContext	boxContext;
 
@@ -211,7 +212,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			ensureResponseContentType();
 
 			// Update this in case the content type has changed
-			writer.setWhitespaceCompressionEnabled( boxContext.isWhitespaceCompressionEnabled() );
+			writer.setWhitespaceCompressionEnabled( boxContext == null ? false : boxContext.isWhitespaceCompressionEnabled() );
 			writer.flush();
 			response.flushBuffer();
 		} catch ( IOException e ) {
@@ -603,7 +604,7 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 				// reponse has already been sent, so return a dummy writer
 				servletWriter = new PrintWriter( NullWriter.INSTANCE );
 			}
-			writer = new WhitespaceManagingPrintWriter( servletWriter, boxContext.isWhitespaceCompressionEnabled() );
+			writer = new WhitespaceManagingPrintWriter( servletWriter, boxContext == null ? false : boxContext.isWhitespaceCompressionEnabled() );
 		}
 		return writer;
 	}
