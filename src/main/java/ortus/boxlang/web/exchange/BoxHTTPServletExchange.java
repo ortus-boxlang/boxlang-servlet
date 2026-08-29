@@ -341,6 +341,10 @@ public class BoxHTTPServletExchange implements IBoxHTTPExchange {
 			Map<String, List<String>>	params	= new HashMap<>();
 			String[]					pairs	= queryString.split( "&" );
 			for ( String pair : pairs ) {
+				// Skip empty pairs from query strings like "&&"
+				if ( pair.isEmpty() ) {
+					continue;
+				}
 				int		idx	= pair.indexOf( "=" );
 				String	key;
 				key = idx > 0 ? URLDecoder.decode( pair.substring( 0, idx ), "UTF-8" ) : pair;
