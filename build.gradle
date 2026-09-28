@@ -429,6 +429,7 @@ task buildRuntime( type: Copy, dependsOn: packageWar ){
 
 		file( "build/evergreen" ).mkdirs()
 		if( branch == 'development' ){
+			Files.copy( file( "build/resources/main/META-INF/boxlang-servlet/version.properties" ).toPath(), file( "build/evergreen/version-snapshot.properties" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.war" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			// Checksums
@@ -437,6 +438,7 @@ task buildRuntime( type: Copy, dependsOn: packageWar ){
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war.sha-256" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.war.sha-256" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war.md5" ).toPath(), file( "build/evergreen/boxlang-servlet-snapshot.war.md5" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 		} else {
+			Files.copy( file( "build/resources/main/META-INF/boxlang-servlet/version.properties" ).toPath(), file( "build/evergreen/version-latest.properties" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.war" ).toPath(), file( "build/evergreen/boxlang-servlet-latest.war" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			Files.copy( file( "build/distributions/boxlang-servlet-${version}.jar" ).toPath(), file( "build/evergreen/boxlang-servlet-latest.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
 			// Checksums
