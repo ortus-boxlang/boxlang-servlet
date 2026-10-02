@@ -17,7 +17,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.ee9.webapp.WebAppContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -85,7 +85,7 @@ public class ServletIntegrationTest {
 		System.setProperty( "org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.StdErrLog" );
 		System.setProperty( "org.eclipse.jetty.LEVEL", "WARN" );
 		System.setProperty( "org.eclipse.jetty.server.LEVEL", "INFO" );
-		System.setProperty( "org.eclipse.jetty.webapp.LEVEL", "INFO" );
+		System.setProperty( "org.eclipse.jetty.ee9.webapp.LEVEL", "INFO" );
 		System.setProperty( "org.eclipse.jetty.io.LEVEL", "WARN" );
 		System.setProperty( "org.eclipse.jetty.http.LEVEL", "WARN" );
 
