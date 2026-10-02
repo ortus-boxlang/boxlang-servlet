@@ -47,7 +47,7 @@ jobs:
           ref: ${{ github.event.inputs.branch || 'main' }}
 
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: "temurin"
           java-version: ${{ env.JDK }}
@@ -154,7 +154,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Anchore Report
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@v4.37.3
         if: always()
         with:
           sarif_file: ${{ steps.securityscan-sarif.outputs.sarif }}
